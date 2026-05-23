@@ -79,8 +79,12 @@ def chart_config(static: bool = False) -> dict:
     }
 
 
-def rangeselector(buttons: list, active_color: str) -> dict:
-    """Range selector buttons sopra al grafico, stile coerente col resto del sito."""
+def rangeselector(buttons: list) -> dict:
+    """Range selector buttons sopra al grafico, stile coerente col resto del sito.
+
+    Uso un grigio chiaro neutro per il bottone attivo (invece di un colore brand)
+    così il testo scuro resta sempre leggibile.
+    """
     return dict(
         buttons=buttons,
         x=0, y=1.18,
@@ -89,7 +93,7 @@ def rangeselector(buttons: list, active_color: str) -> dict:
         bordercolor=COLOR_GRID,
         borderwidth=1,
         font=dict(family=FONT_FAMILY, color=COLOR_FG, size=11),
-        activecolor=active_color,
+        activecolor=COLOR_GRID,  # grigio chiaro: testo scuro sempre leggibile sopra
     )
 
 
@@ -103,11 +107,14 @@ def chart_bev(data: dict) -> str:
     fig.add_trace(go.Bar(
         x=periods, y=regs, name="Immatricolazioni",
         marker_color=COLOR_BEV,
+        xperiod="M1",            # ogni barra rappresenta 1 mese intero
+        xperiodalignment="middle",
         hovertemplate="<b>%{x|%b %Y}</b><br>%{y:,} immatricolazioni<extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=periods, y=shares, name="Market share %",
         mode="lines+markers", yaxis="y2",
+        xperiod="M1", xperiodalignment="middle",
         line=dict(color=COLOR_BEV_LINE, width=2.5),
         marker=dict(size=7),
         hovertemplate="<b>%{x|%b %Y}</b><br>%{y}%% market share<extra></extra>",
@@ -124,7 +131,7 @@ def chart_bev(data: dict) -> str:
             dict(count=12, label="1 anno", step="month", stepmode="backward"),
             dict(count=60, label="5 anni", step="month", stepmode="backward"),
             dict(step="all", label="Tutto"),
-        ], active_color=COLOR_BEV),
+        ]),
     )
     layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True)
     layout["yaxis2"] = dict(title="", overlaying="y", side="right", showgrid=False,
@@ -164,7 +171,7 @@ def chart_payments(data: dict) -> str:
             dict(count=3, label="3 anni", step="year", stepmode="backward"),
             dict(count=5, label="5 anni", step="year", stepmode="backward"),
             dict(step="all", label="Tutto"),
-        ], active_color=COLOR_PAY),
+        ]),
     )
     layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID,
                           automargin=True, ticksuffix="%", range=[0, 70])
