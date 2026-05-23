@@ -55,6 +55,12 @@ jobs:
         run: python scripts/fetch_desertificazione.py
         continue-on-error: true
 
+      - name: Fetch dati mix energetico (ENTSO-E)
+        run: python scripts/fetch_energy_mix.py
+        env:
+          ENTSOE_API_TOKEN: ${{ secrets.ENTSOE_API_TOKEN }}
+        continue-on-error: true
+
       - name: Genera sito
         run: python scripts/build_site.py
 

@@ -372,6 +372,60 @@ def chart_desertification(data: dict) -> str:
                        config=chart_config(static=True))
 
 
+def chart_energy_mix(data: dict) -> str:
+    """Stacked area chart del mix di generazione elettrica italiana, ultimi 24 mesi.
+
+    6 fonti aggregate per leggibilità: gas, solare, idro, eolico, altre rinnovabili, altre fossili.
+    """
+    from datetime import timedelta
+    obs = data.get("observations", [])
+    if not obs:
+        # Placeholder finché l'API non è attiva
+        return ('<div style="padding:60px 20px;text-align:center;color:#8a7a55;'
+                'font-style:italic;">Dati in attesa di prima chiamata API ENTSO-E. '
+                'Il grafico apparirà al primo aggiornamento utile.</div>')
+
+    obs = obs[-24:]
+    periods = [datetime.strptime(o["period"], "%Y-%m").replace(day=15) for o in obs]
+
+    # Palette: ordine narrativo (fossili in fondo grigio, rinnovabili sopra a colori)
+    # In stacked area, l'ORDINE conta: il primo trace sta sotto.
+    layers = [
+        ("altre_fossili",     "Altre fossili",       "#2f2f2f"),
+        ("gas",                "Gas naturale",        "#6f6f6f"),
+        ("idro",               "Idroelettrico",       "#4a6f9a"),
+        ("eolico",             "Eolico",              "#5d9b8c"),
+        ("solare",             "Solare",              "#d6ad3e"),
+        ("altre_rinnovabili",  "Altre rinnovabili",   "#7d9b5a"),
+    ]
+
+    fig = go.Figure()
+    for key, label, color in layers:
+        values = [o.get(key, 0) for o in obs]
+        fig.add_trace(go.Scatter(
+            x=periods, y=values, name=label,
+            stackgroup="one",
+            mode="none",  # solo riempimento, niente linea
+            fillcolor=color,
+            cliponaxis=False,
+            hovertemplate=f"<b>{label}</b><br>%{{x|%b %Y}}: %{{y:.1f}} TWh<extra></extra>",
+        ))
+    layout = common_layout()
+    layout["margin"] = dict(l=60, r=60, t=30, b=50)
+    layout["xaxis"] = dict(
+        type="date", showgrid=False, linecolor=COLOR_GRID,
+        range=[periods[0] - timedelta(days=20), periods[-1] + timedelta(days=20)],
+    )
+    layout["yaxis"] = dict(
+        gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True,
+        ticksuffix=" TWh", rangemode="tozero",
+    )
+    layout["hovermode"] = "x unified"
+    fig.update_layout(**layout)
+    return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-energy-mix",
+                       config=chart_config(static=True))
+
+
 TEMPLATE = """<!doctype html>
 <html lang="it">
 <head>
@@ -489,6 +543,8 @@ def main() -> int:
         banks_data = json.load(f)
     with open(DATA_DIR / "desertificazione_bancaria.json", "r", encoding="utf-8") as f:
         desert_data = json.load(f)
+    with open(DATA_DIR / "mix_energetico.json", "r", encoding="utf-8") as f:
+        energy_data = json.load(f)
 
     # I 5 topic come lista ordinabile. Ogni elemento ha la sua data di ultimo
     # aggiornamento; vengono renderizzati per updated_at DECRESCENTE
@@ -525,6 +581,14 @@ def main() -> int:
             "subtitle": "Quota dei consumi delle famiglie italiane regolata con strumenti elettronici (<strong>blu pieno</strong>) o in contante (<strong>oro tratteggiato</strong>). Il sorpasso è avvenuto nel 2024.",
             "chart_html": chart_payments(pay_data),
             "source_html": 'Fonte: <a href="https://www.osservatori.net/innovative-payments/" target="_blank" rel="noopener">Osservatorio Innovative Payments — Politecnico di Milano</a> · aggiornamento annuale (marzo)',
+        },
+        {
+            "key": "energy",
+            "updated_at": energy_data.get("updated_at", ""),
+            "title": "Mix di generazione elettrica",
+            "subtitle": "Composizione mensile della produzione elettrica nazionale (TWh) per fonte primaria. Si vede la <strong>stagionalità del solare</strong> (estate vs inverno) e la prevalenza del <strong>gas naturale</strong> tra le fossili.",
+            "chart_html": chart_energy_mix(energy_data),
+            "source_html": 'Fonte: <a href="https://transparency.entsoe.eu/" target="_blank" rel="noopener">ENTSO-E Transparency Platform</a> (dati Terna) · aggiornamento mensile',
         },
         {
             "key": "banks",
