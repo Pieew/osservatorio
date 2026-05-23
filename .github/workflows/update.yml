@@ -13,6 +13,10 @@ on:
     #    cashless intorno al 12 marzo. Run extra il 16 marzo per cogliere il
     #    dato 4 giorni dopo, invece di aspettare il 6 aprile.
     - cron: "0 9 16 3 *"
+    #
+    # 3) First CISL pubblica il report annuale della desertificazione bancaria
+    #    a fine gennaio. Run extra il 31 gennaio per cogliere il dato fresco.
+    - cron: "0 9 31 1 *"
 
   workflow_dispatch: # Permette di lanciarlo manualmente dal tab Actions
 
@@ -45,6 +49,10 @@ jobs:
 
       - name: Fetch dati operatori mobili (AGCOM)
         run: python scripts/fetch_mobile.py
+        continue-on-error: true
+
+      - name: Fetch dati desertificazione bancaria (First CISL)
+        run: python scripts/fetch_desertificazione.py
         continue-on-error: true
 
       - name: Genera sito

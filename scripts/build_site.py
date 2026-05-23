@@ -332,6 +332,45 @@ def chart_banks(data: dict) -> str:
                        config=chart_config(static=True))
 
 
+def chart_desertification(data: dict) -> str:
+    """Bar chart annuale del numero di sportelli bancari in Italia.
+
+    Storia: la rete bancaria fisica si è quasi dimezzata in 15 anni.
+    """
+    obs = data["observations"][-10:]
+    years_dt = [datetime(o["year"], 1, 1) for o in obs]
+    sportelli = [o["sportelli"] for o in obs]
+
+    # Bar chart con barre marrone-bruno (evoca "ritirata" / colore terra)
+    COLOR_DESERT = "#8a5a3f"
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=years_dt, y=sportelli, name="Sportelli",
+        marker_color=COLOR_DESERT,
+        width=2.0e10,  # barre larghe (anni interi, non mesi → width molto maggiore)
+        cliponaxis=False,
+        hovertemplate="<b>%{x|%Y}</b><br>%{y:,} sportelli<extra></extra>",
+    ))
+    layout = common_layout()
+    layout["margin"] = dict(l=60, r=60, t=30, b=50)
+    layout["showlegend"] = False
+    first_year = years_dt[0].year
+    last_year = years_dt[-1].year
+    layout["xaxis"] = dict(
+        type="date", showgrid=False, linecolor=COLOR_GRID,
+        tickformat="%Y",
+        range=[datetime(first_year - 1, 7, 1), datetime(last_year, 12, 31)],
+    )
+    layout["yaxis"] = dict(
+        gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True,
+        rangemode="tozero",
+    )
+    fig.update_layout(**layout)
+    return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-desertification",
+                       config=chart_config(static=True))
+
+
 TEMPLATE = """<!doctype html>
 <html lang="it">
 <head>
@@ -444,6 +483,17 @@ TEMPLATE = """<!doctype html>
       <p class="source">Fonte: bilanci annuali e comunicati ufficiali · aggiornamento annuale (primavera, manuale)</p>
     </section>
 
+    <section class="card">
+      <h2>5 · Desertificazione bancaria</h2>
+      <p class="sub">Numero totale di sportelli bancari aperti in Italia, a fine anno. La rete fisica si è quasi <strong>dimezzata in 15 anni</strong>: oltre 11mila sportelli chiusi dal picco del 2012, accelerazione durante la pandemia.</p>
+      <div class="chart-wrap">
+        <!-- CHART:desertification -->
+        __CHART_DESERTIFICATION__
+        <!-- /CHART:desertification -->
+      </div>
+      <p class="source">Fonte: <a href="https://www.firstcisl.it/tag/osservatorio-desertificazione-bancaria/" target="_blank" rel="noopener">First CISL — Osservatorio sulla Desertificazione Bancaria</a> (su dati Banca d'Italia / ISTAT) · aggiornamento annuale (fine gennaio)</p>
+    </section>
+
     <footer>
       <span>Generato automaticamente · build __BUILD_DATE__</span>
       <span>Codice e dati: <a href="#" style="color:inherit">repo GitHub</a></span>
@@ -463,17 +513,21 @@ def main() -> int:
         mob_data = json.load(f)
     with open(DATA_DIR / "banche_italia.json", "r", encoding="utf-8") as f:
         banks_data = json.load(f)
+    with open(DATA_DIR / "desertificazione_bancaria.json", "r", encoding="utf-8") as f:
+        desert_data = json.load(f)
 
     bev_html = chart_bev(bev_data)
     pay_html = chart_payments(pay_data)
     mob_html = chart_mobile(mob_data)
     banks_html = chart_banks(banks_data)
+    desert_html = chart_desertification(desert_data)
 
     updated_at = max(
         bev_data.get("updated_at", ""),
         pay_data.get("updated_at", ""),
         mob_data.get("updated_at", ""),
         banks_data.get("updated_at", ""),
+        desert_data.get("updated_at", ""),
     )
 
     out = (TEMPLATE
@@ -481,6 +535,7 @@ def main() -> int:
            .replace("__CHART_PAYMENTS__", pay_html)
            .replace("__CHART_MOBILE__", mob_html)
            .replace("__CHART_BANKS__", banks_html)
+           .replace("__CHART_DESERTIFICATION__", desert_html)
            .replace("__UPDATED_AT__", updated_at or "—")
            .replace("__BUILD_DATE__", date.today().isoformat()))
 

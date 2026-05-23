@@ -1,0 +1,92 @@
+{
+  "source": "First CISL - Osservatorio sulla Desertificazione Bancaria (Fondazione Fiba), su dati Banca d'Italia e ISTAT",
+  "note": "Numero totale di sportelli bancari in Italia, a fine anno. La serie storica 2010-2024 è ricostruita da fonti pubbliche miste (FABI, UILCA, FISAC CGIL, First CISL). Dal 2025 in avanti viene aggiornata automaticamente leggendo il report annuale pubblicato da First CISL a fine gennaio dell'anno successivo. Picco storico nel 2008 a circa 34.150 sportelli; dimezzati in 17 anni.",
+  "updated_at": "2026-05-23",
+  "observations": [
+    {
+      "year": 2010,
+      "sportelli": 33700,
+      "estimated": true
+    },
+    {
+      "year": 2011,
+      "sportelli": 33500,
+      "estimated": true
+    },
+    {
+      "year": 2012,
+      "sportelli": 32881,
+      "comuni_senza_sportello": null,
+      "estimated": false
+    },
+    {
+      "year": 2013,
+      "sportelli": 31700,
+      "estimated": true
+    },
+    {
+      "year": 2014,
+      "sportelli": 30700,
+      "estimated": true
+    },
+    {
+      "year": 2015,
+      "sportelli": 30258,
+      "estimated": true
+    },
+    {
+      "year": 2016,
+      "sportelli": 29027,
+      "estimated": false
+    },
+    {
+      "year": 2017,
+      "sportelli": 27374,
+      "estimated": true
+    },
+    {
+      "year": 2018,
+      "sportelli": 25409,
+      "estimated": false
+    },
+    {
+      "year": 2019,
+      "sportelli": 24312,
+      "estimated": true
+    },
+    {
+      "year": 2020,
+      "sportelli": 23480,
+      "estimated": false
+    },
+    {
+      "year": 2021,
+      "sportelli": 21650,
+      "comuni_senza_sportello": 3062,
+      "estimated": false
+    },
+    {
+      "year": 2022,
+      "sportelli": 20986,
+      "estimated": true
+    },
+    {
+      "year": 2023,
+      "sportelli": 20161,
+      "estimated": false
+    },
+    {
+      "year": 2024,
+      "sportelli": 19656,
+      "comuni_senza_sportello": 3382,
+      "estimated": false
+    },
+    {
+      "year": 2025,
+      "sportelli": 19140,
+      "comuni_senza_sportello": 3457,
+      "italiani_senza_accesso_milioni": 5.0,
+      "estimated": false
+    }
+  ]
+}
