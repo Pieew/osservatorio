@@ -1,18 +1,21 @@
 """
-Fetch dati pagamenti elettronici Italia da Banca d'Italia.
+Fetch dati cashless vs contante Italia da Osservatorio Innovative Payments
+(School of Management - Politecnico di Milano).
 
-Banca d'Italia pubblica la statistica "Modalità di pagamento disponibili
-per la clientela: dati nazionali" con cadenza trimestrale (talvolta semestrale).
+L'Osservatorio pubblica i dati annuali a marzo di ogni anno (es. i dati 2025
+sono stati presentati il 12 marzo 2026). Lo script:
+  1. Visita la pagina dei comunicati stampa dell'osservatorio
+  2. Cerca l'ultimo comunicato annuale sui pagamenti digitali
+  3. Estrae la quota % cashless e la quota % contante per l'anno appena chiuso
+  4. Appende al JSON se è un nuovo anno
 
-Strategia:
-  1. Visita la pagina indice delle statistiche sui pagamenti
-  2. Trova l'ultimo report rilasciato
-  3. Estrae numero operazioni e valore totale dalle tabelle
-  4. Accoda il dato (se è un nuovo trimestre)
+Lo script è "tollerante": gira ogni mese ma il dato cambia solo a marzo.
+Negli altri mesi esce con successo senza modificare nulla.
 
-Lo script è "tollerante": se il dato è già nel JSON o non c'è ancora un nuovo
-trimestre disponibile, esce con successo senza errori. Questo è importante
-perché lo script gira mensile ma i dati cambiano solo ogni 3 mesi.
+NOTE: il sito osservatori.net mette i comunicati di anno in anno in pagine
+diverse; lo scraping può rompersi. In quel caso il dato si aggiunge a mano
+al JSON in data/pagamenti_italia.json — è un'operazione fatta una volta
+l'anno (a marzo).
 """
 from __future__ import annotations
 
@@ -29,74 +32,60 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "pagamenti_italia.json"
 
-# Pagina indice statistiche pagamenti Banca d'Italia
-BDI_INDEX_URL = "https://www.bancaditalia.it/pubblicazioni/sistema-pagamenti/"
+# Pagina indice dei comunicati dell'Osservatorio
+OBS_BASE = "https://www.osservatori.net"
+OBS_NEWS = "https://www.osservatori.net/it/eventi/comunicati-stampa"
 USER_AGENT = "Mozilla/5.0 (compatible; OsservatorioBot/1.0; +github-actions)"
 TIMEOUT = 30
 
 
-def find_latest_report_url() -> str | None:
-    """Trova l'URL dell'ultimo report 'Modalità di pagamento - dati nazionali'."""
-    resp = requests.get(BDI_INDEX_URL, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
+def fetch_release_data() -> dict | None:
+    """
+    Cerca il comunicato più recente sui pagamenti digitali italiani e ne
+    estrae anno + quote percentuali cashless/cash.
 
-    # Cerca link con titolo che contiene "Modalità di pagamento" e "dati nazionali"
-    pattern = re.compile(r"modalit.+pagamento.+dati\s+nazionali", re.IGNORECASE)
+    Pattern testuali tipici:
+      "Nel 2025 i pagamenti digitali ... 518 miliardi ... 45% dei consumi ...
+       contante ... 38%"
+    """
+    # Prova prima la pagina indice
+    try:
+        resp = requests.get(OBS_NEWS, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
+        resp.raise_for_status()
+    except requests.RequestException:
+        return None
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    # Cerca link a comunicati che contengono "pagamenti digitali" nel testo
+    candidates = []
     for a in soup.find_all("a", href=True):
-        text = a.get_text(" ", strip=True)
-        if pattern.search(text):
-            return urljoin(BDI_INDEX_URL, a["href"])
-    return None
+        text = a.get_text(" ", strip=True).lower()
+        if "pagamenti digitali" in text or "innovative payments" in text:
+            candidates.append(urljoin(OBS_BASE, a["href"]))
 
+    # Visita ciascun candidato e prova a estrarre i numeri
+    for url in candidates[:5]:  # Limite a 5 per non spammare
+        try:
+            r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
+            r.raise_for_status()
+        except requests.RequestException:
+            continue
+        text = BeautifulSoup(r.text, "html.parser").get_text(" ", strip=True)
 
-def extract_payment_data(report_url: str) -> dict | None:
-    """
-    Estrae periodo, n. operazioni e valore complessivo dall'ultimo report.
+        # Cerca: "Nel <ANNO> ... <CASHLESS>% dei consumi ... contante ... <CASH>%"
+        # I numeri possono variare; cerchiamo a finestra
+        year_m = re.search(r"Nel\s+(20\d{2})[\s\S]{0,500}?(\d{2})\s*%\s+dei\s+consumi", text)
+        cash_m = re.search(r"contante[\s\S]{0,200}?(\d{2})\s*%", text, re.IGNORECASE)
+        value_m = re.search(r"(\d{2,4})\s*(?:mld|miliardi)\s+(?:di\s+)?euro", text, re.IGNORECASE)
 
-    Il formato preciso delle tabelle Banca d'Italia varia: spesso le serie
-    storiche sono fornite come file Excel scaricabili o tabelle HTML.
-    Questo è il blocco da adattare al formato corrente — vedi commenti.
-    """
-    resp = requests.get(report_url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
-
-    # ESEMPIO di parsing — da adattare al layout reale.
-    # Tipicamente cerchi:
-    #   - Periodo: dal titolo della pagina o testo "dati al <trimestre> <anno>"
-    #   - Numero operazioni: tabella con valori in milioni/miliardi
-    #   - Valore totale: tabella valori in mld €
-
-    text = soup.get_text(" ", strip=True).lower()
-
-    # Estrai periodo trimestrale
-    period = None
-    # Pattern: "IV trimestre 2025", "4° trimestre 2025", "Q4 2025", "ottobre-dicembre 2025"
-    quarter_map = {
-        "i": "Q1", "1": "Q1", "primo": "Q1",
-        "ii": "Q2", "2": "Q2", "secondo": "Q2",
-        "iii": "Q3", "3": "Q3", "terzo": "Q3",
-        "iv": "Q4", "4": "Q4", "quarto": "Q4",
-    }
-    m = re.search(r"(primo|secondo|terzo|quarto|i{1,3}v?|iv|\d)\s*°?\s*trimestre\s+(20\d{2})", text)
-    if m:
-        q = quarter_map.get(m.group(1).lower())
-        if q:
-            period = f"{m.group(2)}-{q}"
-
-    # TODO: estrai operations_billions e value_billions_eur dalle tabelle
-    # Per ora ritorniamo None se non riusciamo — il workflow continua senza errore
-    # Questo è il punto in cui dovrai adattare quando girerai per la prima volta.
-    operations = None
-    value = None
-
-    if period and operations:
-        return {
-            "period": period,
-            "operations_billions": operations,
-            "value_billions_eur": value,
-        }
+        if year_m and cash_m:
+            return {
+                "year": int(year_m.group(1)),
+                "cashless_pct": float(year_m.group(2)),
+                "cash_pct": float(cash_m.group(1)),
+                "cashless_value_bn_eur": int(value_m.group(1)) if value_m else None,
+                "_source_url": url,
+            }
     return None
 
 
@@ -104,43 +93,40 @@ def append_observation(new_obs: dict) -> bool:
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    existing_periods = {o["period"] for o in data["observations"]}
-    if new_obs["period"] in existing_periods:
-        print(f"  ⊝ periodo {new_obs['period']} già presente, skip.")
+    existing_years = {o["year"] for o in data["observations"]}
+    if new_obs["year"] in existing_years:
+        print(f"  ⊝ anno {new_obs['year']} già presente, skip.")
         return False
 
-    data["observations"].append(new_obs)
-    data["observations"].sort(key=lambda o: o["period"])
+    clean = {k: v for k, v in new_obs.items() if not k.startswith("_")}
+    data["observations"].append(clean)
+    data["observations"].sort(key=lambda o: o["year"])
     data["updated_at"] = date.today().isoformat()
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"  ✓ aggiunto: {new_obs}")
+    print(f"  ✓ aggiunto: {clean}")
     return True
 
 
 def main() -> int:
-    print("→ Cerco l'ultimo report Banca d'Italia sui pagamenti...")
+    print("→ Cerco ultimo comunicato Osservatorio Innovative Payments...")
     try:
-        report_url = find_latest_report_url()
-        if not report_url:
-            print("  ⊝ Nessun report trovato (forse la pagina è cambiata).")
-            return 0  # Non è un errore bloccante: ritenta il mese prossimo
-
-        print(f"  report: {report_url}")
-        obs = extract_payment_data(report_url)
+        obs = fetch_release_data()
         if not obs:
-            print("  ⊝ Nessun nuovo trimestre estraibile (probabilmente i dati non sono ancora aggiornati).")
-            return 0
+            print("  ⊝ Nessun nuovo comunicato annuale trovato (forse non è ancora marzo, o "
+                  "la pagina è cambiata). Lo script ritenterà il prossimo mese.")
+            return 0  # Non bloccante
+
+        print(f"  Trovato: anno={obs['year']} cashless={obs['cashless_pct']}% "
+              f"cash={obs['cash_pct']}% valore={obs.get('cashless_value_bn_eur')}mld "
+              f"da {obs.get('_source_url')}")
 
         append_observation(obs)
         return 0
-    except requests.RequestException as e:
-        print(f"  ✗ Errore di rete: {e}", file=sys.stderr)
-        return 1
     except Exception as e:
-        print(f"  ✗ Errore imprevisto: {e}", file=sys.stderr)
-        return 1
+        print(f"  ⊝ Errore (non bloccante): {e}", file=sys.stderr)
+        return 0
 
 
 if __name__ == "__main__":

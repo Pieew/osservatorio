@@ -90,26 +90,29 @@ def chart_bev(data: dict) -> str:
 
 def chart_payments(data: dict) -> str:
     obs = data["observations"]
-    periods = [o["period"] for o in obs]
-    ops = [o.get("operations_billions") for o in obs]
-    vals = [o.get("value_billions_eur") for o in obs]
+    years = [o["year"] for o in obs]
+    cashless = [o["cashless_pct"] for o in obs]
+    cash = [o["cash_pct"] for o in obs]
+    values = [o.get("cashless_value_bn_eur") for o in obs]
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=periods, y=ops, name="Operazioni (mld)",
-        marker_color=COLOR_PAY,
-        hovertemplate="<b>%{x}</b><br>%{y} mld operazioni<extra></extra>",
+    fig.add_trace(go.Scatter(
+        x=years, y=cashless, name="Pagamenti elettronici",
+        mode="lines+markers",
+        line=dict(color=COLOR_PAY, width=3),
+        marker=dict(size=9),
+        hovertemplate="<b>%{x}</b><br>Cashless: %{y}% dei consumi<extra></extra>",
     ))
     fig.add_trace(go.Scatter(
-        x=periods, y=vals, name="Valore (mld €)",
-        mode="lines+markers", yaxis="y2",
-        line=dict(color=COLOR_PAY_LINE, width=2.5),
-        marker=dict(size=7),
-        hovertemplate="<b>%{x}</b><br>€ %{y:,} mld<extra></extra>",
+        x=years, y=cash, name="Contanti",
+        mode="lines+markers",
+        line=dict(color=COLOR_PAY_LINE, width=3, dash="dot"),
+        marker=dict(size=9),
+        hovertemplate="<b>%{x}</b><br>Contante: %{y}% dei consumi<extra></extra>",
     ))
     layout = common_layout()
-    layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True)
-    layout["yaxis2"] = dict(title="", overlaying="y", side="right", showgrid=False, automargin=True)
+    layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID,
+                          automargin=True, ticksuffix="%", range=[0, 70])
     fig.update_layout(**layout)
 
     return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-payments",
@@ -196,14 +199,14 @@ TEMPLATE = """<!doctype html>
     </section>
 
     <section class="card">
-      <h2>2 · Pagamenti elettronici al dettaglio</h2>
-      <p class="sub">Pagamenti non in contante, dato trimestrale. <strong>Barre blu</strong>: miliardi di operazioni. <strong>Linea oro</strong>: valore complessivo in miliardi di euro.</p>
+      <h2>2 · Cashless vs contanti</h2>
+      <p class="sub">Quota dei consumi delle famiglie italiane regolata con strumenti elettronici (<strong>blu pieno</strong>) o in contante (<strong>oro tratteggiato</strong>). Il sorpasso è avvenuto nel 2024.</p>
       <div class="chart-wrap">
         <!-- CHART:payments -->
         __CHART_PAYMENTS__
         <!-- /CHART:payments -->
       </div>
-      <p class="source">Fonte: <a href="https://www.bancaditalia.it/pubblicazioni/sistema-pagamenti/" target="_blank" rel="noopener">Banca d'Italia</a> · aggiornamento trimestrale</p>
+      <p class="source">Fonte: <a href="https://www.osservatori.net/innovative-payments/" target="_blank" rel="noopener">Osservatorio Innovative Payments — Politecnico di Milano</a> · aggiornamento annuale (marzo)</p>
     </section>
 
     <footer>
