@@ -93,7 +93,7 @@ def chart_bev(data: dict) -> str:
     fig.update_layout(**layout)
 
     return pio.to_html(fig, include_plotlyjs="cdn", full_html=False, div_id="chart-bev",
-                       config={"displayModeBar": False, "responsive": True})
+                       config={"displayModeBar": False, "responsive": True, "staticPlot": True})
 
 
 def chart_payments(data: dict) -> str:
@@ -124,13 +124,13 @@ def chart_payments(data: dict) -> str:
     fig.update_layout(**layout)
 
     return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-payments",
-                       config={"displayModeBar": False, "responsive": True})
+                       config={"displayModeBar": False, "responsive": True, "staticPlot": True})
 
 
 def chart_mobile(data: dict) -> str:
     """
-    Bar chart orizzontale dell'ultimo trimestre, ordinato per quota decrescente.
-    Mostra accanto a ogni barra la variazione vs lo stesso trimestre dell'anno prima.
+    Bar chart verticale dell'ultimo trimestre, ordinato per quota decrescente.
+    Sopra ogni barra: quota % + variazione vs lo stesso trimestre di un anno fa.
     """
     obs = data["observations"]
     operators = data["operators"]
@@ -138,72 +138,62 @@ def chart_mobile(data: dict) -> str:
         return ""
 
     latest = obs[-1]
-    # Trova l'osservazione di 4 trimestri fa (stesso trimestre anno precedente)
     latest_period = latest["period"]  # es. "2025-Q4"
     year, q = latest_period.split("-")
     yoy_period = f"{int(year) - 1}-{q}"
     yoy = next((o for o in obs if o["period"] == yoy_period), None)
 
-    # Ordina operatori per quota decrescente nell'ultimo trimestre
     sorted_ops = sorted(operators, key=lambda op: latest.get(op, 0), reverse=True)
     values = [latest.get(op, 0) for op in sorted_ops]
 
-    # Calcola delta anno su anno (in punti percentuali)
     deltas = []
     for op in sorted_ops:
         if yoy and yoy.get(op) is not None:
-            d = latest.get(op, 0) - yoy.get(op, 0)
-            deltas.append(d)
+            deltas.append(latest.get(op, 0) - yoy.get(op, 0))
         else:
             deltas.append(None)
 
-    # Etichette testuali a destra di ogni barra: "23.5%  ▲ +1.0 pp"
+    # Etichette su due righe: prima la quota, poi la delta (più leggibile su mobile)
     text_labels = []
     for v, d in zip(values, deltas):
         if d is None:
-            text_labels.append(f"  {v:.1f}%")
+            text_labels.append(f"<b>{v:.1f}%</b>")
         elif d > 0.05:
-            text_labels.append(f"  {v:.1f}%   ▲ +{d:.1f} pp")
+            text_labels.append(f"<b>{v:.1f}%</b><br>▲ +{d:.1f} pp")
         elif d < -0.05:
-            text_labels.append(f"  {v:.1f}%   ▼ {d:.1f} pp")
+            text_labels.append(f"<b>{v:.1f}%</b><br>▼ {d:.1f} pp")
         else:
-            text_labels.append(f"  {v:.1f}%   ◆ ≈ 0")
+            text_labels.append(f"<b>{v:.1f}%</b><br>≈ 0")
 
     colors = [COLOR_OPERATORS.get(op, "#666") for op in sorted_ops]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=values,
-        y=sorted_ops,
-        orientation="h",
+        x=sorted_ops,
+        y=values,
         marker_color=colors,
         text=text_labels,
         textposition="outside",
-        textfont=dict(family=FONT_FAMILY, size=13, color=COLOR_FG),
+        textfont=dict(family=FONT_FAMILY, size=12, color=COLOR_FG),
         cliponaxis=False,
-        hovertemplate="<b>%{y}</b><br>%{x}% SIM Human<extra></extra>",
     ))
 
     layout = common_layout()
-    # Asse Y: nomi operatori, asse X: quota %
-    layout["yaxis"] = dict(
-        autorange="reversed",  # il primo in alto
-        showgrid=False,
-        automargin=True,
-        tickfont=dict(size=13),
-    )
     layout["xaxis"] = dict(
+        showgrid=False, automargin=True,
+        tickfont=dict(size=12),
+    )
+    layout["yaxis"] = dict(
         showgrid=True, gridcolor=COLOR_GRID,
-        ticksuffix="%", range=[0, max(values) * 1.35],  # spazio per le label a destra
+        ticksuffix="%", range=[0, max(values) * 1.30],  # spazio per label sopra
         automargin=True,
     )
     layout["showlegend"] = False
-    # Margine sinistro maggiore per i nomi operatori
-    layout["margin"] = dict(l=130, r=40, t=30, b=40)
+    layout["margin"] = dict(l=40, r=20, t=40, b=40)
     fig.update_layout(**layout)
 
     return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-mobile",
-                       config={"displayModeBar": False, "responsive": True})
+                       config={"displayModeBar": False, "responsive": True, "staticPlot": True})
 
 
 TEMPLATE = """<!doctype html>
@@ -246,7 +236,7 @@ TEMPLATE = """<!doctype html>
     section.card .source { font-size: 12px; color: var(--fg-soft); margin-top: 8px; text-align: right; }
     section.card .source a { color: inherit; text-underline-offset: 2px; }
 
-    .chart-wrap { background: var(--bg); padding: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+    .chart-wrap { background: var(--bg); padding: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); touch-action: pan-y; }
 
     footer { margin-top: 96px; padding-top: 28px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--fg-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 
