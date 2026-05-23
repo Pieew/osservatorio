@@ -128,7 +128,7 @@ def chart_bev(data: dict) -> str:
     # Range esplicito = primo e ultimo dato visualizzato, con padding mezza-barra
     layout["xaxis"] = dict(
         type="date", showgrid=False, linecolor=COLOR_GRID,
-        range=[periods[0] - timedelta(days=13), periods[-1] + timedelta(days=13)],
+        range=[periods[0] - timedelta(days=25), periods[-1] + timedelta(days=25)],
     )
     layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True)
     layout["yaxis2"] = dict(title="", overlaying="y", side="right", showgrid=False,
@@ -172,8 +172,8 @@ def chart_payments(data: dict) -> str:
         type="date", showgrid=False, linecolor=COLOR_GRID,
         tickformat="%Y",
         range=[
-            datetime(first_year - 1, 7, 1),
-            datetime(last_year, 12, 31),
+            datetime(first_year - 1, 1, 1),     # 1 anno intero di padding a sx
+            datetime(last_year, 12, 31),         # fino al 31 dic ultimo anno (no 2026)
         ],
     )
     layout["yaxis"] = dict(title="", gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID,
@@ -259,22 +259,23 @@ def chart_banks(data: dict) -> str:
     Pattern stilistico simile a chart_mobile (operatori), ma orizzontale perché
     i nomi delle banche sono lunghi e meritano spazio a sinistra.
     """
-    # Mostra SEMPRE solo gli ultimi 10 anni; primo e ultimo definiscono il delta
+    # Mostra SEMPRE solo gli ultimi 10 anni di dati nel JSON, ma il delta
+    # si calcola SOLO rispetto all'anno precedente (snapshot anno su anno).
     obs = data["observations"][-10:]
     banks = data["banks"]
-    first_obs = obs[0]
+    prev_obs = obs[-2]    # anno precedente per calcolo delta
     last_obs = obs[-1]
-    first_year = first_obs["year"]
+    prev_year = prev_obs["year"]
     last_year = last_obs["year"]
 
     rows = []
     for bank in banks:
         name = bank["name"]
         v_now = last_obs.get(name)
-        v_first = first_obs.get(name)
-        if v_now is None or v_first is None or v_first == 0:
+        v_prev = prev_obs.get(name)
+        if v_now is None or v_prev is None or v_prev == 0:
             continue
-        delta_pct = (v_now - v_first) / v_first * 100
+        delta_pct = (v_now - v_prev) / v_prev * 100
         rows.append({
             "name": name, "color": bank["color"],
             "value": v_now, "delta_pct": delta_pct,
@@ -311,7 +312,7 @@ def chart_banks(data: dict) -> str:
         hovertemplate=(
             "<b>%{y}</b><br>"
             f"Clienti {last_year}: %{{x}}M<br>"
-            f"Variazione dal {first_year}: %{{customdata}}<extra></extra>"
+            f"Variazione vs {prev_year}: %{{customdata}}<extra></extra>"
         ),
         customdata=[fmt_delta(r["delta_pct"]) for r in rows],
     ))
@@ -360,7 +361,7 @@ def chart_desertification(data: dict) -> str:
     layout["xaxis"] = dict(
         type="date", showgrid=False, linecolor=COLOR_GRID,
         tickformat="%Y",
-        range=[datetime(first_year - 1, 7, 1), datetime(last_year, 12, 31)],
+        range=[datetime(first_year - 1, 1, 1), datetime(last_year, 12, 31)],
     )
     layout["yaxis"] = dict(
         gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True,
@@ -412,6 +413,15 @@ TEMPLATE = """<!doctype html>
     section.card .source a { color: inherit; text-underline-offset: 2px; }
 
     .chart-wrap { background: var(--bg); padding: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); touch-action: pan-y; }
+
+    /* Su dispositivi touch (mobile, tablet) i grafici Plotly diventano
+       totalmente statici: niente hover, niente drag, niente pinch.
+       Lo scroll della pagina passa attraverso il grafico senza che
+       venga interpretato come pan/zoom interno. */
+    @media (pointer: coarse) {
+      .chart-wrap .js-plotly-plot,
+      .chart-wrap .js-plotly-plot * { pointer-events: none !important; }
+    }
 
     footer { margin-top: 96px; padding-top: 28px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--fg-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 
@@ -473,8 +483,8 @@ TEMPLATE = """<!doctype html>
     </section>
 
     <section class="card">
-      <h2>4 · Banche e fintech — clienti in Italia</h2>
-      <p class="sub">Numero clienti delle principali banche italiane nell'ultimo anno disponibile, con la <strong>variazione percentuale</strong> rispetto a 10 anni prima. Spicca la crescita di <strong>Revolut</strong> (fintech) contro la sostanziale stabilità delle tradizionali.</p>
+      <h2>4 · Banche e fintech</h2>
+      <p class="sub">Numero clienti delle principali banche italiane nell'ultimo anno disponibile, con la <strong>variazione percentuale anno su anno</strong>. Spicca la crescita di <strong>Revolut</strong> contro la sostanziale stabilità delle tradizionali.</p>
       <div class="chart-wrap">
         <!-- CHART:banks -->
         __CHART_BANKS__
