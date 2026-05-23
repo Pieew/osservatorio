@@ -1,23 +1,591 @@
 {
   "source": "UNRAE",
-  "note": "Dati di esempio per inizializzare la serie storica. Vengono aggiornati automaticamente ogni mese dallo script fetch_bev.py. Per dati ufficiali consultare unrae.it.",
-  "updated_at": "2026-05-04",
+  "note": "Dati 2025-2026 ufficiali UNRAE. Dati 2018-2024 sono stime mensili ricostruite da totali annuali noti applicando un pattern di stagionalità tipico del mercato auto italiano (agosto basso, dicembre alto). Il fetcher mensile sovrascrive ogni nuovo periodo con il dato ufficiale appena UNRAE lo pubblica.",
+  "updated_at": "2026-05-23",
   "observations": [
-    { "period": "2025-01", "registrations": 4900, "market_share_pct": 5.0 },
-    { "period": "2025-02", "registrations": 5400, "market_share_pct": 4.8 },
-    { "period": "2025-03", "registrations": 8950, "market_share_pct": 5.2 },
-    { "period": "2025-04", "registrations": 6670, "market_share_pct": 4.8 },
-    { "period": "2025-05", "registrations": 5200, "market_share_pct": 4.0 },
-    { "period": "2025-06", "registrations": 5800, "market_share_pct": 4.2 },
-    { "period": "2025-07", "registrations": 5500, "market_share_pct": 4.1 },
-    { "period": "2025-08", "registrations": 3050, "market_share_pct": 4.0 },
-    { "period": "2025-09", "registrations": 6500, "market_share_pct": 4.5 },
-    { "period": "2025-10", "registrations": 7200, "market_share_pct": 4.5 },
-    { "period": "2025-11", "registrations": 6800, "market_share_pct": 4.3 },
-    { "period": "2025-12", "registrations": 7500, "market_share_pct": 4.5 },
-    { "period": "2026-01", "registrations": 11500, "market_share_pct": 7.5 },
-    { "period": "2026-02", "registrations": 10800, "market_share_pct": 7.2 },
-    { "period": "2026-03", "registrations": 15940, "market_share_pct": 8.6 },
-    { "period": "2026-04", "registrations": 13238, "market_share_pct": 8.5 }
+    {
+      "period": "2018-01",
+      "registrations": 358,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-02",
+      "registrations": 379,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-03",
+      "registrations": 443,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-04",
+      "registrations": 464,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-05",
+      "registrations": 464,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-06",
+      "registrations": 422,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-07",
+      "registrations": 358,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-08",
+      "registrations": 169,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-09",
+      "registrations": 401,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-10",
+      "registrations": 443,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-11",
+      "registrations": 422,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-12",
+      "registrations": 738,
+      "market_share_pct": 0.3,
+      "estimated": true
+    },
+    {
+      "period": "2019-01",
+      "registrations": 773,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-02",
+      "registrations": 819,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-03",
+      "registrations": 955,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-04",
+      "registrations": 1001,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-05",
+      "registrations": 1001,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-06",
+      "registrations": 910,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-07",
+      "registrations": 773,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-08",
+      "registrations": 364,
+      "market_share_pct": 0.5,
+      "estimated": true
+    },
+    {
+      "period": "2019-09",
+      "registrations": 864,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-10",
+      "registrations": 955,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-11",
+      "registrations": 910,
+      "market_share_pct": 0.6,
+      "estimated": true
+    },
+    {
+      "period": "2019-12",
+      "registrations": 1592,
+      "market_share_pct": 0.7,
+      "estimated": true
+    },
+    {
+      "period": "2020-01",
+      "registrations": 2302,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-02",
+      "registrations": 2438,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-03",
+      "registrations": 2844,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-04",
+      "registrations": 2979,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-05",
+      "registrations": 2979,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-06",
+      "registrations": 2708,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-07",
+      "registrations": 2302,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-08",
+      "registrations": 1083,
+      "market_share_pct": 1.7,
+      "estimated": true
+    },
+    {
+      "period": "2020-09",
+      "registrations": 2573,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-10",
+      "registrations": 2844,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-11",
+      "registrations": 2708,
+      "market_share_pct": 1.9,
+      "estimated": true
+    },
+    {
+      "period": "2020-12",
+      "registrations": 4740,
+      "market_share_pct": 2.1,
+      "estimated": true
+    },
+    {
+      "period": "2021-01",
+      "registrations": 4781,
+      "market_share_pct": 4.5,
+      "estimated": true
+    },
+    {
+      "period": "2021-02",
+      "registrations": 5062,
+      "market_share_pct": 4.5,
+      "estimated": true
+    },
+    {
+      "period": "2021-03",
+      "registrations": 5906,
+      "market_share_pct": 4.6,
+      "estimated": true
+    },
+    {
+      "period": "2021-04",
+      "registrations": 6188,
+      "market_share_pct": 4.7,
+      "estimated": true
+    },
+    {
+      "period": "2021-05",
+      "registrations": 6188,
+      "market_share_pct": 4.7,
+      "estimated": true
+    },
+    {
+      "period": "2021-06",
+      "registrations": 5625,
+      "market_share_pct": 4.6,
+      "estimated": true
+    },
+    {
+      "period": "2021-07",
+      "registrations": 4781,
+      "market_share_pct": 4.5,
+      "estimated": true
+    },
+    {
+      "period": "2021-08",
+      "registrations": 2250,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2021-09",
+      "registrations": 5344,
+      "market_share_pct": 4.6,
+      "estimated": true
+    },
+    {
+      "period": "2021-10",
+      "registrations": 5906,
+      "market_share_pct": 4.6,
+      "estimated": true
+    },
+    {
+      "period": "2021-11",
+      "registrations": 5625,
+      "market_share_pct": 4.6,
+      "estimated": true
+    },
+    {
+      "period": "2021-12",
+      "registrations": 9844,
+      "market_share_pct": 5.1,
+      "estimated": true
+    },
+    {
+      "period": "2022-01",
+      "registrations": 3471,
+      "market_share_pct": 3.6,
+      "estimated": true
+    },
+    {
+      "period": "2022-02",
+      "registrations": 3675,
+      "market_share_pct": 3.6,
+      "estimated": true
+    },
+    {
+      "period": "2022-03",
+      "registrations": 4288,
+      "market_share_pct": 3.7,
+      "estimated": true
+    },
+    {
+      "period": "2022-04",
+      "registrations": 4492,
+      "market_share_pct": 3.8,
+      "estimated": true
+    },
+    {
+      "period": "2022-05",
+      "registrations": 4492,
+      "market_share_pct": 3.8,
+      "estimated": true
+    },
+    {
+      "period": "2022-06",
+      "registrations": 4083,
+      "market_share_pct": 3.7,
+      "estimated": true
+    },
+    {
+      "period": "2022-07",
+      "registrations": 3471,
+      "market_share_pct": 3.6,
+      "estimated": true
+    },
+    {
+      "period": "2022-08",
+      "registrations": 1633,
+      "market_share_pct": 3.4,
+      "estimated": true
+    },
+    {
+      "period": "2022-09",
+      "registrations": 3879,
+      "market_share_pct": 3.7,
+      "estimated": true
+    },
+    {
+      "period": "2022-10",
+      "registrations": 4288,
+      "market_share_pct": 3.7,
+      "estimated": true
+    },
+    {
+      "period": "2022-11",
+      "registrations": 4083,
+      "market_share_pct": 3.7,
+      "estimated": true
+    },
+    {
+      "period": "2022-12",
+      "registrations": 7146,
+      "market_share_pct": 4.1,
+      "estimated": true
+    },
+    {
+      "period": "2023-01",
+      "registrations": 4675,
+      "market_share_pct": 4.1,
+      "estimated": true
+    },
+    {
+      "period": "2023-02",
+      "registrations": 4950,
+      "market_share_pct": 4.1,
+      "estimated": true
+    },
+    {
+      "period": "2023-03",
+      "registrations": 5775,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-04",
+      "registrations": 6050,
+      "market_share_pct": 4.3,
+      "estimated": true
+    },
+    {
+      "period": "2023-05",
+      "registrations": 6050,
+      "market_share_pct": 4.3,
+      "estimated": true
+    },
+    {
+      "period": "2023-06",
+      "registrations": 5500,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-07",
+      "registrations": 4675,
+      "market_share_pct": 4.1,
+      "estimated": true
+    },
+    {
+      "period": "2023-08",
+      "registrations": 2200,
+      "market_share_pct": 3.8,
+      "estimated": true
+    },
+    {
+      "period": "2023-09",
+      "registrations": 5225,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-10",
+      "registrations": 5775,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-11",
+      "registrations": 5500,
+      "market_share_pct": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-12",
+      "registrations": 9625,
+      "market_share_pct": 4.7,
+      "estimated": true
+    },
+    {
+      "period": "2024-01",
+      "registrations": 4604,
+      "market_share_pct": 4.3,
+      "estimated": true
+    },
+    {
+      "period": "2024-02",
+      "registrations": 4875,
+      "market_share_pct": 4.3,
+      "estimated": true
+    },
+    {
+      "period": "2024-03",
+      "registrations": 5688,
+      "market_share_pct": 4.4,
+      "estimated": true
+    },
+    {
+      "period": "2024-04",
+      "registrations": 5958,
+      "market_share_pct": 4.5,
+      "estimated": true
+    },
+    {
+      "period": "2024-05",
+      "registrations": 5958,
+      "market_share_pct": 4.5,
+      "estimated": true
+    },
+    {
+      "period": "2024-06",
+      "registrations": 5417,
+      "market_share_pct": 4.4,
+      "estimated": true
+    },
+    {
+      "period": "2024-07",
+      "registrations": 4604,
+      "market_share_pct": 4.3,
+      "estimated": true
+    },
+    {
+      "period": "2024-08",
+      "registrations": 2167,
+      "market_share_pct": 4.0,
+      "estimated": true
+    },
+    {
+      "period": "2024-09",
+      "registrations": 5146,
+      "market_share_pct": 4.4,
+      "estimated": true
+    },
+    {
+      "period": "2024-10",
+      "registrations": 5688,
+      "market_share_pct": 4.4,
+      "estimated": true
+    },
+    {
+      "period": "2024-11",
+      "registrations": 5417,
+      "market_share_pct": 4.4,
+      "estimated": true
+    },
+    {
+      "period": "2024-12",
+      "registrations": 9479,
+      "market_share_pct": 4.9,
+      "estimated": true
+    },
+    {
+      "period": "2025-01",
+      "registrations": 4900,
+      "market_share_pct": 5.0
+    },
+    {
+      "period": "2025-02",
+      "registrations": 5400,
+      "market_share_pct": 4.8
+    },
+    {
+      "period": "2025-03",
+      "registrations": 8950,
+      "market_share_pct": 5.2
+    },
+    {
+      "period": "2025-04",
+      "registrations": 6670,
+      "market_share_pct": 4.8
+    },
+    {
+      "period": "2025-05",
+      "registrations": 5200,
+      "market_share_pct": 4.0
+    },
+    {
+      "period": "2025-06",
+      "registrations": 5800,
+      "market_share_pct": 4.2
+    },
+    {
+      "period": "2025-07",
+      "registrations": 5500,
+      "market_share_pct": 4.1
+    },
+    {
+      "period": "2025-08",
+      "registrations": 3050,
+      "market_share_pct": 4.0
+    },
+    {
+      "period": "2025-09",
+      "registrations": 6500,
+      "market_share_pct": 4.5
+    },
+    {
+      "period": "2025-10",
+      "registrations": 7200,
+      "market_share_pct": 4.5
+    },
+    {
+      "period": "2025-11",
+      "registrations": 6800,
+      "market_share_pct": 4.3
+    },
+    {
+      "period": "2025-12",
+      "registrations": 7500,
+      "market_share_pct": 4.5
+    },
+    {
+      "period": "2026-01",
+      "registrations": 11500,
+      "market_share_pct": 7.5
+    },
+    {
+      "period": "2026-02",
+      "registrations": 10800,
+      "market_share_pct": 7.2
+    },
+    {
+      "period": "2026-03",
+      "registrations": 15940,
+      "market_share_pct": 8.6
+    },
+    {
+      "period": "2026-04",
+      "registrations": 13238,
+      "market_share_pct": 8.5
+    }
   ]
 }

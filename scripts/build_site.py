@@ -113,11 +113,16 @@ def chart_bev(data: dict) -> str:
         hovertemplate="<b>%{x|%b %Y}</b><br>%{y}%% market share<extra></extra>",
     ))
     layout = common_layout()
+    # Range iniziale: ultimi 12 mesi (l'utente può espandere coi bottoni)
+    last_dt = periods[-1]
+    initial_start = datetime(last_dt.year - 1, last_dt.month, 1)
     layout["xaxis"] = dict(
         type="date", showgrid=False, linecolor=COLOR_GRID, automargin=True,
+        range=[initial_start, last_dt],
         rangeselector=rangeselector([
             dict(count=6, label="6 mesi", step="month", stepmode="backward"),
             dict(count=12, label="1 anno", step="month", stepmode="backward"),
+            dict(count=60, label="5 anni", step="month", stepmode="backward"),
             dict(step="all", label="Tutto"),
         ], active_color=COLOR_BEV),
     )

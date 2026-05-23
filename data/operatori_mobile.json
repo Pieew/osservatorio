@@ -1,9 +1,314 @@
 {
   "source": "AGCOM - Osservatorio sulle Comunicazioni",
-  "note": "Quote di mercato (%) sulle SIM Human (escluse M2M/IoT). Top 4 operatori. Vodafone e Fastweb sono aggregati come 'Vodafone+Fastweb' anche retroattivamente per coerenza (fusione 2025). I trimestri marcati con 'estimated: true' sono stime interpolate dai trimestri vicini in attesa che lo scraper li sostituisca con i dati ufficiali AGCOM.",
-  "updated_at": "2026-05-16",
-  "operators": ["TIM", "Vodafone+Fastweb", "WindTre", "Iliad"],
+  "note": "Quote di mercato (%) sulle SIM Human (escluse M2M/IoT). Top 4 operatori. Vodafone+Fastweb aggregati retroattivamente per coerenza con la fusione 2025 (Fastweb mobile era marginale pre-2020). Pre-2018-Q2 Iliad = 0 (entrato giugno 2018). I trimestri 'estimated:true' sono interpolati linearmente tra punti certi AGCOM; il fetcher li sovrascrive con i dati ufficiali quando disponibili.",
+  "updated_at": "2026-05-23",
+  "operators": [
+    "TIM",
+    "Vodafone+Fastweb",
+    "WindTre",
+    "Iliad"
+  ],
   "observations": [
+    {
+      "period": "2015-Q1",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2015-Q2",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2015-Q3",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2015-Q4",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2016-Q1",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2016-Q2",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2016-Q3",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2016-Q4",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2017-Q1",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2017-Q2",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2017-Q3",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2017-Q4",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2018-Q1",
+      "TIM": 33.0,
+      "Vodafone+Fastweb": 31.5,
+      "WindTre": 32.5,
+      "Iliad": 0.0,
+      "estimated": true
+    },
+    {
+      "period": "2018-Q2",
+      "TIM": 32.5,
+      "Vodafone+Fastweb": 30.5,
+      "WindTre": 30.0,
+      "Iliad": 1.0,
+      "estimated": true
+    },
+    {
+      "period": "2018-Q3",
+      "TIM": 31.5,
+      "Vodafone+Fastweb": 29.8,
+      "WindTre": 29.5,
+      "Iliad": 2.3,
+      "estimated": true
+    },
+    {
+      "period": "2018-Q4",
+      "TIM": 30.7,
+      "Vodafone+Fastweb": 29.2,
+      "WindTre": 29.2,
+      "Iliad": 3.4
+    },
+    {
+      "period": "2019-Q1",
+      "TIM": 30.3,
+      "Vodafone+Fastweb": 28.9,
+      "WindTre": 28.9,
+      "Iliad": 4.2,
+      "estimated": true
+    },
+    {
+      "period": "2019-Q2",
+      "TIM": 29.9,
+      "Vodafone+Fastweb": 28.6,
+      "WindTre": 28.6,
+      "Iliad": 5.0,
+      "estimated": true
+    },
+    {
+      "period": "2019-Q3",
+      "TIM": 29.4,
+      "Vodafone+Fastweb": 28.3,
+      "WindTre": 28.3,
+      "Iliad": 5.8,
+      "estimated": true
+    },
+    {
+      "period": "2019-Q4",
+      "TIM": 29.0,
+      "Vodafone+Fastweb": 28.0,
+      "WindTre": 28.0,
+      "Iliad": 6.6
+    },
+    {
+      "period": "2020-Q1",
+      "TIM": 28.6,
+      "Vodafone+Fastweb": 27.5,
+      "WindTre": 27.8,
+      "Iliad": 7.1,
+      "estimated": true
+    },
+    {
+      "period": "2020-Q2",
+      "TIM": 28.3,
+      "Vodafone+Fastweb": 27.0,
+      "WindTre": 27.6,
+      "Iliad": 7.6,
+      "estimated": true
+    },
+    {
+      "period": "2020-Q3",
+      "TIM": 27.9,
+      "Vodafone+Fastweb": 26.5,
+      "WindTre": 27.4,
+      "Iliad": 8.0,
+      "estimated": true
+    },
+    {
+      "period": "2020-Q4",
+      "TIM": 27.5,
+      "Vodafone+Fastweb": 26.0,
+      "WindTre": 27.2,
+      "Iliad": 8.5,
+      "estimated": true
+    },
+    {
+      "period": "2021-Q1",
+      "TIM": 27.1,
+      "Vodafone+Fastweb": 25.5,
+      "WindTre": 27.0,
+      "Iliad": 9.0,
+      "estimated": true
+    },
+    {
+      "period": "2021-Q2",
+      "TIM": 26.8,
+      "Vodafone+Fastweb": 25.1,
+      "WindTre": 26.9,
+      "Iliad": 9.5,
+      "estimated": true
+    },
+    {
+      "period": "2021-Q3",
+      "TIM": 26.4,
+      "Vodafone+Fastweb": 24.6,
+      "WindTre": 26.7,
+      "Iliad": 10.0,
+      "estimated": true
+    },
+    {
+      "period": "2021-Q4",
+      "TIM": 26.0,
+      "Vodafone+Fastweb": 24.1,
+      "WindTre": 26.5,
+      "Iliad": 10.5,
+      "estimated": true
+    },
+    {
+      "period": "2022-Q1",
+      "TIM": 25.6,
+      "Vodafone+Fastweb": 23.6,
+      "WindTre": 26.3,
+      "Iliad": 10.9,
+      "estimated": true
+    },
+    {
+      "period": "2022-Q2",
+      "TIM": 25.3,
+      "Vodafone+Fastweb": 23.1,
+      "WindTre": 26.1,
+      "Iliad": 11.4,
+      "estimated": true
+    },
+    {
+      "period": "2022-Q3",
+      "TIM": 24.9,
+      "Vodafone+Fastweb": 22.6,
+      "WindTre": 25.9,
+      "Iliad": 11.9
+    },
+    {
+      "period": "2022-Q4",
+      "TIM": 24.6,
+      "Vodafone+Fastweb": 22.6,
+      "WindTre": 25.6,
+      "Iliad": 12.2,
+      "estimated": true
+    },
+    {
+      "period": "2023-Q1",
+      "TIM": 24.4,
+      "Vodafone+Fastweb": 22.5,
+      "WindTre": 25.3,
+      "Iliad": 12.6
+    },
+    {
+      "period": "2023-Q2",
+      "TIM": 24.2,
+      "Vodafone+Fastweb": 23.1,
+      "WindTre": 25.1,
+      "Iliad": 12.9,
+      "estimated": true
+    },
+    {
+      "period": "2023-Q3",
+      "TIM": 24.1,
+      "Vodafone+Fastweb": 23.7,
+      "WindTre": 24.9,
+      "Iliad": 13.3,
+      "estimated": true
+    },
+    {
+      "period": "2023-Q4",
+      "TIM": 23.9,
+      "Vodafone+Fastweb": 24.3,
+      "WindTre": 24.6,
+      "Iliad": 13.6,
+      "estimated": true
+    },
+    {
+      "period": "2024-Q1",
+      "TIM": 23.8,
+      "Vodafone+Fastweb": 24.9,
+      "WindTre": 24.4,
+      "Iliad": 13.9,
+      "estimated": true
+    },
+    {
+      "period": "2024-Q2",
+      "TIM": 23.6,
+      "Vodafone+Fastweb": 25.5,
+      "WindTre": 24.2,
+      "Iliad": 14.3,
+      "estimated": true
+    },
     {
       "period": "2024-Q3",
       "TIM": 23.5,
@@ -14,25 +319,25 @@
     {
       "period": "2024-Q4",
       "TIM": 23.4,
-      "Vodafone+Fastweb": 26.0,
+      "Vodafone+Fastweb": 25.9,
       "WindTre": 23.9,
-      "Iliad": 14.85,
+      "Iliad": 14.8,
       "estimated": true
     },
     {
       "period": "2025-Q1",
-      "TIM": 23.3,
-      "Vodafone+Fastweb": 25.85,
-      "WindTre": 23.85,
+      "TIM": 23.2,
+      "Vodafone+Fastweb": 25.8,
+      "WindTre": 23.9,
       "Iliad": 15.1,
       "estimated": true
     },
     {
       "period": "2025-Q2",
-      "TIM": 23.1,
+      "TIM": 23.0,
       "Vodafone+Fastweb": 25.6,
       "WindTre": 23.8,
-      "Iliad": 15.35,
+      "Iliad": 15.3,
       "estimated": true
     },
     {
