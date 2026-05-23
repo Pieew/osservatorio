@@ -17,6 +17,11 @@ on:
     # 3) First CISL pubblica il report annuale della desertificazione bancaria
     #    a fine gennaio. Run extra il 31 gennaio per cogliere il dato fresco.
     - cron: "0 9 31 1 *"
+    #
+    # 4) ACI pubblica l'Autoritratto annuale (parco veicolare) a novembre.
+    #    Run extra il 15 dicembre per cogliere il dato del nuovo anno
+    #    pubblicato qualche settimana prima.
+    - cron: "0 9 15 12 *"
 
   workflow_dispatch: # Permette di lanciarlo manualmente dal tab Actions
 
@@ -59,6 +64,10 @@ jobs:
         run: python scripts/fetch_energy_mix.py
         env:
           ENTSOE_API_TOKEN: ${{ secrets.ENTSOE_API_TOKEN }}
+        continue-on-error: true
+
+      - name: Fetch dati parco auto Milano (ACI Autoritratto)
+        run: python scripts/fetch_auto_milano.py
         continue-on-error: true
 
       - name: Genera sito

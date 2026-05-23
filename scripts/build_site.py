@@ -426,6 +426,63 @@ def chart_energy_mix(data: dict) -> str:
                        config=chart_config(static=True))
 
 
+def chart_auto_milano(data: dict) -> str:
+    """Stacked area annuale del parco auto in provincia di Milano per alimentazione.
+
+    3 categorie aggregate (limite del dato ACI a livello provinciale):
+      - Benzina (esclusi ibridi)
+      - Gasolio (esclusi ibridi)
+      - Altre (GPL + metano + ibrido + elettrico)
+    """
+    from datetime import datetime as _dt, timedelta
+    obs = data.get("observations", [])
+    if not obs:
+        return ('<div style="padding:60px 20px;text-align:center;color:#8a7a55;'
+                'font-style:italic;">Nessun dato disponibile.</div>')
+
+    years_dt = [_dt(o["year"], 1, 1) for o in obs]
+    first_year = years_dt[0].year
+    last_year = years_dt[-1].year
+
+    # Ordine stacked dal basso: benzina (stabile, base) → gasolio (in calo) → altre (in crescita)
+    layers = [
+        ("benzina",  "Benzina",                                "#a87544"),
+        ("gasolio",  "Gasolio",                                "#5a5a5a"),
+        ("altre",    "Altre (GPL, metano, ibrido, elettrico)", "#5d9b6a"),
+    ]
+
+    fig = go.Figure()
+    for key, label, color in layers:
+        values = [o.get(key, 0) / 1000 for o in obs]  # in migliaia
+        fig.add_trace(go.Scatter(
+            x=years_dt, y=values, name=label,
+            stackgroup="one",
+            mode="lines+markers",
+            line=dict(color=color, width=0),
+            marker=dict(size=6, color=color, line=dict(color=COLOR_BG, width=1.5)),
+            fillcolor=color,
+            cliponaxis=False,
+            hovertemplate=f"<b>{label}</b><br>%{{x|%Y}}: %{{y:.0f}}k auto<extra></extra>",
+        ))
+
+    layout = common_layout()
+    layout["margin"] = dict(l=60, r=60, t=30, b=50)
+    layout["xaxis"] = dict(
+        type="date", showgrid=False, linecolor=COLOR_GRID,
+        tickformat="%Y",
+        range=[_dt(first_year, 1, 1) - timedelta(days=120),
+               _dt(last_year, 12, 31) + timedelta(days=60)],
+    )
+    layout["yaxis"] = dict(
+        gridcolor=COLOR_GRID, zerolinecolor=COLOR_GRID, automargin=True,
+        ticksuffix="k", rangemode="tozero",
+    )
+    layout["hovermode"] = "x unified"
+    fig.update_layout(**layout)
+    return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-auto-milano",
+                       config=chart_config(static=True))
+
+
 TEMPLATE = """<!doctype html>
 <html lang="it">
 <head>
@@ -545,6 +602,8 @@ def main() -> int:
         desert_data = json.load(f)
     with open(DATA_DIR / "mix_energetico.json", "r", encoding="utf-8") as f:
         energy_data = json.load(f)
+    with open(DATA_DIR / "auto_milano.json", "r", encoding="utf-8") as f:
+        auto_data = json.load(f)
 
     # I 5 topic come lista ordinabile. Ogni elemento ha la sua data di ultimo
     # aggiornamento; vengono renderizzati per updated_at DECRESCENTE
@@ -589,6 +648,14 @@ def main() -> int:
             "subtitle": "Composizione mensile della produzione elettrica nazionale (TWh) per fonte primaria. Si vede la <strong>stagionalità del solare</strong> (estate vs inverno) e la prevalenza del <strong>gas naturale</strong> tra le fossili.",
             "chart_html": chart_energy_mix(energy_data),
             "source_html": 'Fonte: <a href="https://transparency.entsoe.eu/" target="_blank" rel="noopener">ENTSO-E Transparency Platform</a> (dati Terna) · aggiornamento mensile',
+        },
+        {
+            "key": "auto_milano",
+            "updated_at": auto_data.get("updated_at", ""),
+            "title": "Auto in provincia di Milano",
+            "subtitle": "Parco autovetture circolanti in provincia di Milano per tipo di alimentazione. Il totale è quasi <strong>stabile attorno a 1,85 milioni</strong>, ma la composizione cambia: il <strong>gasolio cala</strong> dal Dieselgate in poi, mentre <strong>ibridi, elettrici, GPL e metano</strong> raddoppiano.",
+            "chart_html": chart_auto_milano(auto_data),
+            "source_html": 'Fonte: <a href="https://www.aci.it/laci/studi-e-ricerche/dati-e-statistiche/open-data.html" target="_blank" rel="noopener">ACI Autoritratto</a> · aggiornamento annuale (autunno)',
         },
         {
             "key": "banks",

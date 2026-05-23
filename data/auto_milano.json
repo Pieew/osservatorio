@@ -1,0 +1,19 @@
+{
+  "source": "ACI Autoritratto - Parco veicolare circolante",
+  "scope": "Provincia di Milano",
+  "note": "Numero di autovetture circolanti nella provincia di Milano al 31 dicembre di ciascun anno, suddivise per tipo di alimentazione. La categoria 'altre' aggrega GPL, metano, ibridi (benzina/gasolio) ed elettrici puri: a livello provinciale ACI Open Data non li disaggrega ulteriormente. Pubblicazione annuale (autunno dell'anno successivo).",
+  "updated_at": "2025-11-15",
+  "categories_legend": {
+    "benzina": "Benzina (esclusi ibridi)",
+    "gasolio": "Gasolio/Diesel (esclusi ibridi)",
+    "altre": "GPL + metano + ibridi + elettrici + altre alimentazioni"
+  },
+  "observations": [
+    {"year": 2019, "benzina": 1067240, "gasolio": 596913, "altre": 158578, "totale": 1822731},
+    {"year": 2020, "benzina": 1074088, "gasolio": 565474, "altre": 180114, "totale": 1819676},
+    {"year": 2021, "benzina": 1062998, "gasolio": 527116, "altre": 217733, "totale": 1807847},
+    {"year": 2022, "benzina": 1064303, "gasolio": 494928, "altre": 259369, "totale": 1818600},
+    {"year": 2023, "benzina": 1071627, "gasolio": 464390, "altre": 312852, "totale": 1848869},
+    {"year": 2024, "benzina": 1062081, "gasolio": 426235, "altre": 366429, "totale": 1854745}
+  ]
+}
