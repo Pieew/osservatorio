@@ -19,7 +19,12 @@ from pathlib import Path
 import plotly.graph_objects as go
 import plotly.io as pio
 
+# Disattiva il template Plotly di default: evita di serializzare ~30KB di
+# colorscale (Viridis, Plasma...) inutilizzati dentro OGNI chart.
+pio.templates.default = "none"
+
 ROOT = Path(__file__).resolve().parents[1]
+REPO_URL = "https://github.com/Pieew/osservatorio"
 DATA_DIR = ROOT / "data"
 OUTPUT_HTML = ROOT / "docs" / "index.html"
 
@@ -542,83 +547,155 @@ TEMPLATE = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Osservatorio Italia — Dati mensili</title>
-  <meta name="description" content="Monitoraggio mensile di indicatori italiani: auto elettriche e pagamenti elettronici.">
+  <title>Osservatorio Italia — __N_TOPICS__ indicatori che raccontano il paese</title>
+  <meta name="description" content="Monitoraggio automatico di __N_TOPICS__ indicatori italiani: auto elettriche, pagamenti, telecom, banche, energia, aria. Aggiornato di continuo da fonti pubbliche.">
+  <meta property="og:title" content="Osservatorio Italia">
+  <meta property="og:description" content="__N_TOPICS__ indicatori italiani aggiornati di continuo da fonti pubbliche.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="__REPO_URL__">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #faf8f3;
+      --bg-soft: #f3efe5;
       --fg: #1a1a1a;
       --fg-soft: #5a5651;
+      --fg-mute: #8a847a;
       --rule: #d4cfc1;
-      --accent-bev: #1d6f42;
-      --accent-pay: #2c4a7a;
+      --rule-soft: #e8e2d2;
+      /* Due famiglie di accent semantici per i topic */
+      --accent-transizione: #1d6f42; /* mobilità, energia, ambiente */
+      --accent-societa:     #2c4a7a; /* finanza, telecom, accesso */
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16130f;
+        --bg-soft: #1f1b16;
+        --fg: #f0ebe0;
+        --fg-soft: #a8a195;
+        --fg-mute: #6e6a62;
+        --rule: #322c25;
+        --rule-soft: #28231d;
+        --accent-transizione: #6cb88a;
+        --accent-societa:     #7fa3d4;
+      }
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
     body { font-family: "Geist", system-ui, sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
 
     .wrap { max-width: 1080px; margin: 0 auto; padding: 64px 32px 96px; }
 
-    header { border-bottom: 1px solid var(--rule); padding-bottom: 28px; margin-bottom: 56px; }
+    /* ------- HEADER ------- */
+    header.hero { border-bottom: 1px solid var(--rule); padding-bottom: 28px; margin-bottom: 24px; }
     .eyebrow { font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: var(--fg-soft); margin: 0 0 12px; }
     h1 { font-family: "Fraunces", serif; font-weight: 500; font-size: clamp(38px, 5vw, 60px); line-height: 1.05; margin: 0 0 16px; letter-spacing: -0.01em; font-variation-settings: "opsz" 144; }
     h1 em { font-style: italic; font-weight: 400; color: var(--fg-soft); }
     .lede { font-family: "Fraunces", serif; font-size: 18px; line-height: 1.55; max-width: 62ch; color: var(--fg-soft); margin: 0; }
-
     .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 24px; font-size: 13px; color: var(--fg-soft); }
     .meta span strong { color: var(--fg); font-weight: 500; }
 
-    section.card { margin-bottom: 80px; }
-    section.card h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: 28px; margin: 0 0 6px; letter-spacing: -0.005em; }
-    section.card .sub { color: var(--fg-soft); font-size: 14px; margin: 0 0 28px; }
-    section.card .source { font-size: 12px; color: var(--fg-soft); margin-top: 8px; text-align: right; }
-    section.card .source a { color: inherit; text-underline-offset: 2px; }
+    /* ------- TOC / NAV ------- */
+    nav.toc { margin: 0 0 72px; padding: 20px 0 0; font-size: 13px; }
+    nav.toc ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 24px; counter-reset: tocnum; }
+    nav.toc li { counter-increment: tocnum; border-top: 1px solid var(--rule-soft); padding: 10px 0; }
+    nav.toc a { text-decoration: none; color: var(--fg); display: flex; align-items: baseline; gap: 10px; transition: color .15s; }
+    nav.toc a::before { content: counter(tocnum, decimal-leading-zero); color: var(--fg-mute); font-variant-numeric: tabular-nums; font-size: 11px; min-width: 22px; }
+    nav.toc a:hover { color: var(--accent-transizione); }
+    nav.toc li[data-group="societa"] a:hover { color: var(--accent-societa); }
+    nav.toc .toc-label { font-family: "Geist", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; font-size: 10px; color: var(--fg-mute); margin: 0 0 10px; }
 
-    .chart-wrap { background: var(--bg); padding: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); touch-action: pan-y; }
+    /* ------- SECTION / CARD ------- */
+    section.card { margin-bottom: 96px; scroll-margin-top: 20px; }
+    section.card .cat { font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.18em; font-size: 10px; margin: 0 0 10px; }
+    section.card[data-group="transizione"] .cat { color: var(--accent-transizione); }
+    section.card[data-group="societa"]     .cat { color: var(--accent-societa); }
+    section.card h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: clamp(24px, 2.6vw, 32px); margin: 0 0 8px; letter-spacing: -0.005em; line-height: 1.15; }
+    section.card .sub { color: var(--fg-soft); font-size: 14px; line-height: 1.55; margin: 0 0 24px; max-width: 64ch; }
 
-    /* Su dispositivi touch (mobile, tablet) i grafici Plotly diventano
-       totalmente statici: niente hover, niente drag, niente pinch.
-       Lo scroll della pagina passa attraverso il grafico senza che
-       venga interpretato come pan/zoom interno. */
+    /* Headline KPI — la cifra-chiave prima del grafico */
+    .headline { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin: 0 0 18px; padding: 14px 0; border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft); }
+    .headline .kpi { font-family: "Fraunces", serif; font-weight: 500; font-size: clamp(36px, 4.4vw, 52px); line-height: 1; letter-spacing: -0.02em; color: var(--fg); font-variant-numeric: tabular-nums; }
+    .headline .kpi .unit { font-size: 0.42em; font-weight: 400; color: var(--fg-soft); margin-left: 6px; font-feature-settings: normal; letter-spacing: 0; }
+    .headline .ctx { color: var(--fg-soft); font-size: 14px; line-height: 1.45; flex: 1 1 280px; }
+    .headline .ctx .pos { color: var(--accent-transizione); font-weight: 500; }
+    .headline .ctx .neg { color: #c0392b; font-weight: 500; }
+
+    /* Citation / source — promosso a first-class */
+    .citation { display: flex; gap: 16px; align-items: flex-start; margin: 0 0 24px; padding: 12px 14px; background: var(--bg-soft); border-left: 3px solid var(--rule); font-size: 12.5px; line-height: 1.5; }
+    .citation .cite-label { font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.16em; font-size: 10px; color: var(--fg-mute); flex: 0 0 auto; padding-top: 2px; }
+    .citation .cite-body { flex: 1; color: var(--fg-soft); }
+    .citation .cite-body a { color: var(--fg); text-underline-offset: 2px; }
+    .citation .cite-meta { color: var(--fg-mute); margin-left: 8px; }
+
+    /* Chart container — min-height per evitare CLS al render Plotly */
+    .chart-wrap { background: var(--bg); padding: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); touch-action: pan-y; min-height: 420px; }
+    .chart-wrap > div { min-height: 420px; }
+
     @media (pointer: coarse) {
       .chart-wrap .js-plotly-plot,
       .chart-wrap .js-plotly-plot * { pointer-events: none !important; }
     }
 
+    /* Tabella dati collassabile sotto al chart */
+    details.data-table { margin-top: 14px; font-size: 13px; }
+    details.data-table summary { cursor: pointer; color: var(--fg-soft); font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.14em; font-size: 10.5px; padding: 6px 0; user-select: none; list-style: none; display: inline-flex; align-items: center; gap: 8px; }
+    details.data-table summary::-webkit-details-marker { display: none; }
+    details.data-table summary::before { content: "+"; display: inline-block; width: 14px; text-align: center; color: var(--fg-mute); font-weight: 400; }
+    details.data-table[open] summary::before { content: "−"; }
+    details.data-table summary:hover { color: var(--fg); }
+    details.data-table table { width: 100%; border-collapse: collapse; margin-top: 12px; font-variant-numeric: tabular-nums; }
+    details.data-table th, details.data-table td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--rule-soft); }
+    details.data-table th { font-weight: 500; color: var(--fg-mute); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+    details.data-table td:first-child, details.data-table th:first-child { text-align: left; color: var(--fg-soft); }
+
+    /* ------- FOOTER ------- */
     footer { margin-top: 96px; padding-top: 28px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--fg-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    footer a { color: var(--fg); text-underline-offset: 2px; }
 
     @media (max-width: 640px) {
       .wrap { padding: 32px 16px 56px; }
-      header { margin-bottom: 40px; }
+      header.hero { margin-bottom: 16px; }
+      nav.toc { margin-bottom: 48px; }
+      nav.toc ol { grid-template-columns: 1fr; }
       h1 { font-size: 36px; }
       .lede { font-size: 16px; }
-      section.card { margin-bottom: 56px; }
-      section.card h2 { font-size: 22px; }
-      section.card .sub { font-size: 13px; }
-      .chart-wrap { margin: 0 -16px; padding: 0; } /* il grafico va edge-to-edge su mobile */
+      section.card { margin-bottom: 64px; }
+      .headline { gap: 10px; padding: 12px 0; }
+      .chart-wrap { margin: 0 -16px; padding: 0; min-height: 360px; }
+      .chart-wrap > div { min-height: 360px; }
+      .citation { flex-direction: column; gap: 6px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <header class="hero">
       <p class="eyebrow">Osservatorio Italia</p>
-      <h1>Dati mensili <em>dall'Italia che cambia</em></h1>
-      <p class="lede">Un monitoraggio essenziale di due indicatori che raccontano la transizione in corso: la diffusione dell'auto elettrica e l'uso dei pagamenti digitali.</p>
+      <h1>Numeri pubblici <em>per leggere il paese</em></h1>
+      <p class="lede">__N_TOPICS__ indicatori raccolti automaticamente da fonti pubbliche — UNRAE, AGCOM, Banca d'Italia, ARPA, ENTSO-E, ACI — per seguire come cambiano mobilità, consumi, finanza, energia e ambiente in Italia.</p>
       <div class="meta">
-        <span>Ultimo aggiornamento: <strong>__UPDATED_AT__</strong></span>
-        <span>Cadenza: <strong>mensile</strong></span>
+        <span>Ultimo dato disponibile: <strong>__UPDATED_AT__</strong></span>
+        <span>Topic monitorati: <strong>__N_TOPICS__</strong></span>
+        <span>Cadenze: <strong>mensile, trimestrale, annuale</strong></span>
       </div>
     </header>
 
+    <nav class="toc" aria-label="Indice dei topic">
+      <p class="toc-label">Indice</p>
+      <ol>__TOC__</ol>
+    </nav>
+
+    <main>
     __TOPICS__
+    </main>
 
     <footer>
       <span>Generato automaticamente · build __BUILD_DATE__</span>
-      <span>Codice e dati: <a href="#" style="color:inherit">repo GitHub</a></span>
+      <span>Codice e dati: <a href="__REPO_URL__" target="_blank" rel="noopener">github.com/Pieew/osservatorio</a></span>
     </footer>
   </div>
 </body>
@@ -626,20 +703,229 @@ TEMPLATE = """<!doctype html>
 """
 
 
-def render_topic(t: dict) -> str:
-    """Renderizza una singola sezione topic.
+# ---------- Helpers per headline, citation, tabella dati ----------
 
-    `t` è un dict con: title, subtitle, chart_html, source_html, updated_at.
-    Mostra anche la data dell'ultimo aggiornamento sotto al titolo,
-    per dare contesto su 'perché è in questa posizione'.
+MONTHS_IT = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+             "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
+
+
+def _fmt_int(n: float) -> str:
+    """1234567 -> '1.234.567' (separatore italiano)."""
+    return f"{int(round(n)):,}".replace(",", ".")
+
+
+def _fmt_dec(n: float, digits: int = 1) -> str:
+    """13.7 -> '13,7' (virgola decimale italiana, punto migliaia)."""
+    s = f"{n:,.{digits}f}"  # es. "1,234.56"
+    return s.replace(",", "§").replace(".", ",").replace("§", ".")
+
+
+def _fmt_period_it(period: str) -> str:
+    """'2026-04' -> 'aprile 2026'. '2025-Q4' -> 'Q4 2025'. '2024' -> '2024'."""
+    if "-Q" in period:
+        y, q = period.split("-")
+        return f"{q} {y}"
+    if "-" in period:
+        y, m = period.split("-")
+        return f"{MONTHS_IT[int(m) - 1]} {y}"
+    return period
+
+
+def _delta_span(delta_pct: float, suffix: str = "") -> str:
+    """Renderizza una variazione con classe positiva/negativa per il colore."""
+    if delta_pct is None:
+        return ""
+    if delta_pct > 0:
+        return f'<span class="pos">+{delta_pct:.0f}%{suffix}</span>'
+    return f'<span class="neg">{delta_pct:.0f}%{suffix}</span>'
+
+
+def headline_html(kpi: str, unit: str, context: str) -> str:
+    """Blocco KPI prominente. `context` può contenere HTML inline."""
+    unit_html = f'<span class="unit">{unit}</span>' if unit else ""
+    return (f'<div class="headline">'
+            f'<div class="kpi">{kpi}{unit_html}</div>'
+            f'<div class="ctx">{context}</div>'
+            f'</div>')
+
+
+def citation_html(source: str, cadence: str, last_period: str) -> str:
+    """Citazione editoriale al posto della footnote.
+
+    `source` può contenere già <a>. `last_period` è 'aprile 2026' o '2025'.
     """
-    return f"""    <section class="card">
+    meta_bits = [c for c in [cadence, f"ultimo dato: {last_period}" if last_period else None] if c]
+    meta = " · ".join(meta_bits)
+    return (f'<div class="citation">'
+            f'<span class="cite-label">Fonte</span>'
+            f'<span class="cite-body">{source}'
+            f'<span class="cite-meta">— {meta}</span>'
+            f'</span></div>')
+
+
+def table_html(headers: list[str], rows: list[list[str]]) -> str:
+    """Tabella collassabile 'Mostra i numeri' sotto al chart."""
+    thead = "".join(f"<th>{h}</th>" for h in headers)
+    body = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
+    return (f'<details class="data-table">'
+            f'<summary>Mostra i numeri</summary>'
+            f'<table><thead><tr>{thead}</tr></thead><tbody>{body}</tbody></table>'
+            f'</details>')
+
+
+# ---------- Headline computation per ciascun topic ----------
+
+def headline_bev(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    period = _fmt_period_it(last["period"])
+    last_y, last_m = last["period"].split("-")
+    yoy_period = f"{int(last_y) - 1}-{last_m}"
+    yoy = next((o for o in obs if o["period"] == yoy_period), None)
+    parts = [f"<b>{period}</b> · <b>{_fmt_dec(last['market_share_pct'])}%</b> di quota di mercato"]
+    if yoy:
+        delta = (last["registrations"] - yoy["registrations"]) / yoy["registrations"] * 100
+        parts.append(f"{_delta_span(delta, ' YoY')} sulle immatricolazioni")
+    return headline_html(_fmt_int(last["registrations"]), "BEV", " · ".join(parts))
+
+
+def headline_mobile(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    ops = d["operators"]
+    leader = max(ops, key=lambda o: last.get(o, 0))
+    leader_share = last[leader]
+    period = _fmt_period_it(last["period"])
+    lo, hi = min(last[o] for o in ops), max(last[o] for o in ops)
+    return headline_html(
+        _fmt_dec(leader_share), "%",
+        f"<b>{leader}</b> resta il primo operatore SIM Human nel <b>{period}</b>. "
+        f"Quattro operatori si dividono il mercato in fasce strette: {lo:.0f}–{hi:.0f}%."
+    )
+
+
+def headline_desert(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    # picco storico per riferimento
+    peak = max(obs, key=lambda o: o["sportelli"])
+    delta = (last["sportelli"] - peak["sportelli"]) / peak["sportelli"] * 100
+    ctx = (f"sportelli aperti a fine <b>{last['year']}</b>, "
+           f"{_delta_span(delta)} dal picco di <b>{peak['year']}</b> ({_fmt_int(peak['sportelli'])}).")
+    if last.get("comuni_senza_sportello"):
+        ctx += f" <b>{_fmt_int(last['comuni_senza_sportello'])} comuni</b> oggi sono senza sportello bancario."
+    return headline_html(_fmt_int(last["sportelli"]), "", ctx)
+
+
+def headline_payments(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    return headline_html(
+        f"{last['cashless_pct']:.0f}", "% cashless",
+        f"dei consumi delle famiglie italiane nel <b>{last['year']}</b>. "
+        f"Il contante è al <b>{last['cash_pct']:.0f}%</b>: il sorpasso è del 2024."
+    )
+
+
+def headline_pollution(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    period = _fmt_period_it(last["period"])
+    threshold = d.get("threshold_oms_annuale", 15)
+    value = last["pm25_media"]
+    if value <= threshold:
+        ratio_txt = f'<span class="pos">sotto la soglia annuale OMS</span> ({threshold} µg/m³)'
+    else:
+        x = value / threshold
+        ratio_txt = f'<span class="neg">{_fmt_dec(x)}× la soglia annuale OMS</span> ({threshold} µg/m³)'
+    return headline_html(
+        _fmt_dec(value), "µg/m³",
+        f"media PM2.5 di <b>{period}</b> su {last.get('stazioni_n', 6)} città lombarde — {ratio_txt}."
+    )
+
+
+def headline_auto_milano(d: dict) -> str:
+    obs = d["observations"]
+    last = obs[-1]
+    first = obs[0]
+    altre_growth = (last["altre"] - first["altre"]) / first["altre"] * 100
+    gasolio_drop = (last["gasolio"] - first["gasolio"]) / first["gasolio"] * 100
+    totale_m = last["totale"] / 1_000_000
+    return headline_html(
+        _fmt_dec(totale_m, 2), " M auto",
+        f"totale provincia di Milano nel <b>{last['year']}</b>. "
+        f"Dal {first['year']}: gasolio {_delta_span(gasolio_drop)}, "
+        f"alimentazioni alternative {_delta_span(altre_growth)}."
+    )
+
+
+def headline_energy(d: dict) -> str:
+    obs = d.get("observations", [])
+    if not obs:
+        return headline_html("—", "", "Dati in attesa della prima chiamata API a ENTSO-E. Il KPI apparirà al primo aggiornamento utile.")
+    last = obs[-1]
+    period = _fmt_period_it(last["period"])
+    total = sum(v for k, v in last.items() if isinstance(v, (int, float)) and k != "year")
+    return headline_html(_fmt_dec(total), " TWh", f"produzione elettrica nazionale di <b>{period}</b>.")
+
+
+def headline_banks(d: dict) -> str:
+    obs = d["observations"]
+    banks = d["banks"]
+    last = obs[-1]
+    leader = max(banks, key=lambda b: last.get(b["name"], 0))
+    leader_val = last[leader["name"]]
+    revolut_first = obs[0].get("Revolut", 0) or 0.01
+    revolut_last = last.get("Revolut", 0)
+    rev_growth = (revolut_last - revolut_first) / revolut_first * 100
+    return headline_html(
+        _fmt_dec(leader_val), " M clienti",
+        f"<b>{leader['name']}</b> capofila nel <b>{last['year']}</b>. "
+        f"Sull'altro fronte, Revolut passa da {_fmt_dec(revolut_first, 2)}M ({obs[0]['year']}) "
+        f"a {_fmt_dec(revolut_last)}M ({last['year']}): {_delta_span(rev_growth)}."
+    )
+
+
+# ---------- Tabelle dati per topic (opzionale, ultimi 12 valori) ----------
+
+def table_bev(d: dict) -> str:
+    obs = d["observations"][-12:]
+    rows = [[_fmt_period_it(o["period"]), _fmt_int(o["registrations"]), f"{_fmt_dec(o['market_share_pct'])}%"]
+            for o in reversed(obs)]
+    return table_html(["Mese", "Immatricolazioni", "Market share"], rows)
+
+
+def table_payments(d: dict) -> str:
+    obs = d["observations"][-10:]
+    rows = [[str(o["year"]), f"{o['cashless_pct']:.0f}%", f"{o['cash_pct']:.0f}%"]
+            for o in reversed(obs)]
+    return table_html(["Anno", "Cashless", "Contanti"], rows)
+
+
+def table_desert(d: dict) -> str:
+    obs = d["observations"][-10:]
+    rows = [[str(o["year"]), _fmt_int(o["sportelli"])] for o in reversed(obs)]
+    return table_html(["Anno", "Sportelli"], rows)
+
+
+def table_pollution(d: dict) -> str:
+    obs = d["observations"][-12:]
+    rows = [[_fmt_period_it(o["period"]), f"{_fmt_dec(o['pm25_media'])} µg/m³"] for o in reversed(obs)]
+    return table_html(["Mese", "PM2.5 media 6 città"], rows)
+
+
+def render_topic(t: dict, index: int) -> str:
+    """Renderizza una singola sezione topic con headline, citation, chart, tabella opzionale."""
+    table = f"\n        {t['table_html']}" if t.get("table_html") else ""
+    return f"""    <section class="card" id="{t['key']}" data-group="{t['group']}">
+      <p class="cat">{t['category']}</p>
       <h2>{t['title']}</h2>
       <p class="sub">{t['subtitle']}</p>
+      {t['headline_html']}
+      {t['citation_html']}
       <div class="chart-wrap">
         {t['chart_html']}
-      </div>
-      <p class="source">{t['source_html']}</p>
+      </div>{table}
     </section>"""
 
 
@@ -661,88 +947,166 @@ def main() -> int:
     with open(DATA_DIR / "inquinamento_padana.json", "r", encoding="utf-8") as f:
         pollution_data = json.load(f)
 
-    # I 5 topic come lista ordinabile. Ogni elemento ha la sua data di ultimo
-    # aggiornamento; vengono renderizzati per updated_at DECRESCENTE
-    # (il più recente in cima al feed).
+    # Ultimo periodo "umano" per ogni dataset (per la citation block).
+    def last_period_of(obs_list, key="period"):
+        if not obs_list:
+            return ""
+        last = obs_list[-1]
+        if key in last:
+            return _fmt_period_it(last[key])
+        if "year" in last:
+            return str(last["year"])
+        return ""
+
+    # Ogni topic ha:
+    #   key           – id ancora / nav
+    #   group         – "transizione" | "societa"  → palette accent
+    #   category      – eyebrow editoriale sopra al titolo
+    #   updated_at    – per l'ordine feed-style (più recente in cima)
+    #   title/subtitle
+    #   chart_html, headline_html, citation_html, table_html?
     topics = [
         {
             "key": "bev",
+            "group": "transizione",
+            "category": "Mobilità · transizione",
             "updated_at": bev_data.get("updated_at", ""),
             "title": "Auto full electric immatricolate",
-            "subtitle": "Nuove BEV registrate ogni mese in Italia. <strong>Barre verdi</strong>: numero immatricolazioni. <strong>Linea ruggine</strong>: quota di mercato.",
+            "subtitle": "Nuove BEV registrate ogni mese in Italia. Barre: numero immatricolazioni; linea: quota di mercato sul totale del mese.",
             "chart_html": chart_bev(bev_data),
-            "source_html": 'Fonte: <a href="https://unrae.it/notizie" target="_blank" rel="noopener">UNRAE</a> · aggiornamento mensile',
+            "headline_html": headline_bev(bev_data),
+            "citation_html": citation_html(
+                '<a href="https://unrae.it/notizie" target="_blank" rel="noopener">UNRAE</a>',
+                "aggiornamento mensile", last_period_of(bev_data["observations"]),
+            ),
+            "table_html": table_bev(bev_data),
         },
         {
             "key": "mobile",
+            "group": "societa",
+            "category": "Telecom · concorrenza",
             "updated_at": mob_data.get("updated_at", ""),
             "title": "Operatori telefonici mobili",
-            "subtitle": "Classifica per quota di mercato sulle SIM <strong>Human</strong> (escluse M2M/IoT) nell'ultimo trimestre disponibile, con variazione rispetto a 12 mesi prima.",
+            "subtitle": "Quota di mercato sulle SIM Human (escluse M2M/IoT) nell'ultimo trimestre disponibile, con variazione rispetto allo stesso trimestre dell'anno prima.",
             "chart_html": chart_mobile(mob_data),
-            "source_html": 'Fonte: <a href="https://www.agcom.it/comunicazione/comunicati-stampa" target="_blank" rel="noopener">AGCOM — Osservatorio sulle Comunicazioni</a> · aggiornamento trimestrale',
+            "headline_html": headline_mobile(mob_data),
+            "citation_html": citation_html(
+                '<a href="https://www.agcom.it/comunicazione/comunicati-stampa" target="_blank" rel="noopener">AGCOM — Osservatorio sulle Comunicazioni</a>',
+                "aggiornamento trimestrale", last_period_of(mob_data["observations"]),
+            ),
         },
         {
             "key": "desert",
+            "group": "societa",
+            "category": "Accesso · servizi",
             "updated_at": desert_data.get("updated_at", ""),
             "title": "Desertificazione bancaria",
-            "subtitle": "Numero totale di sportelli bancari aperti in Italia, a fine anno. La rete fisica si è quasi <strong>dimezzata in 15 anni</strong>: oltre 11mila sportelli chiusi dal picco del 2012, accelerazione durante la pandemia.",
+            "subtitle": "Numero totale di sportelli bancari aperti in Italia, a fine anno. Misura quanto la rete fisica si è ritirata dal picco del 2012.",
             "chart_html": chart_desertification(desert_data),
-            "source_html": 'Fonte: <a href="https://www.firstcisl.it/tag/osservatorio-desertificazione-bancaria/" target="_blank" rel="noopener">First CISL — Osservatorio sulla Desertificazione Bancaria</a> (su dati Banca d\'Italia / ISTAT) · aggiornamento annuale (fine gennaio)',
+            "headline_html": headline_desert(desert_data),
+            "citation_html": citation_html(
+                '<a href="https://www.firstcisl.it/tag/osservatorio-desertificazione-bancaria/" target="_blank" rel="noopener">First CISL</a> (su dati Banca d\'Italia / ISTAT)',
+                "aggiornamento annuale (fine gennaio)", str(desert_data["observations"][-1]["year"]),
+            ),
+            "table_html": table_desert(desert_data),
         },
         {
             "key": "payments",
+            "group": "societa",
+            "category": "Finanza · abitudini",
             "updated_at": pay_data.get("updated_at", ""),
             "title": "Cashless vs contanti",
-            "subtitle": "Quota dei consumi delle famiglie italiane regolata con strumenti elettronici (<strong>blu pieno</strong>) o in contante (<strong>oro tratteggiato</strong>). Il sorpasso è avvenuto nel 2024.",
+            "subtitle": "Quota dei consumi delle famiglie italiane regolata con strumenti elettronici o in contante.",
             "chart_html": chart_payments(pay_data),
-            "source_html": 'Fonte: <a href="https://www.osservatori.net/innovative-payments/" target="_blank" rel="noopener">Osservatorio Innovative Payments — Politecnico di Milano</a> · aggiornamento annuale (marzo)',
+            "headline_html": headline_payments(pay_data),
+            "citation_html": citation_html(
+                '<a href="https://www.osservatori.net/innovative-payments/" target="_blank" rel="noopener">Osservatorio Innovative Payments — Politecnico di Milano</a>',
+                "aggiornamento annuale (marzo)", str(pay_data["observations"][-1]["year"]),
+            ),
+            "table_html": table_payments(pay_data),
         },
         {
             "key": "energy",
+            "group": "transizione",
+            "category": "Energia · mix",
             "updated_at": energy_data.get("updated_at", ""),
             "title": "Mix di generazione elettrica",
-            "subtitle": "Composizione mensile della produzione elettrica nazionale (TWh) per fonte primaria. Si vede la <strong>stagionalità del solare</strong> (estate vs inverno) e la prevalenza del <strong>gas naturale</strong> tra le fossili.",
+            "subtitle": "Composizione mensile della produzione elettrica nazionale per fonte primaria. Si vede la stagionalità del solare e la prevalenza del gas tra le fossili.",
             "chart_html": chart_energy_mix(energy_data),
-            "source_html": 'Fonte: <a href="https://transparency.entsoe.eu/" target="_blank" rel="noopener">ENTSO-E Transparency Platform</a> (dati Terna) · aggiornamento mensile',
+            "headline_html": headline_energy(energy_data),
+            "citation_html": citation_html(
+                '<a href="https://transparency.entsoe.eu/" target="_blank" rel="noopener">ENTSO-E Transparency Platform</a> (dati Terna)',
+                "aggiornamento mensile", last_period_of(energy_data.get("observations", [])),
+            ),
         },
         {
             "key": "pollution",
+            "group": "transizione",
+            "category": "Ambiente · aria",
             "updated_at": pollution_data.get("updated_at", ""),
-            "title": "Inquinamento PM2.5 in Pianura Padana",
-            "subtitle": "Media mensile di particolato fine PM2.5 in <strong>6 città</strong> della Pianura Padana lombarda (Milano, Brescia, Bergamo, Cremona, Pavia, Mantova). Stagionalità marcatissima: in <strong>inverno si supera il doppio del limite OMS</strong> a causa di riscaldamento e inversioni termiche, in estate si rientra vicino alla soglia.",
+            "title": "PM2.5 in Pianura Padana",
+            "subtitle": "Media mensile di particolato fine PM2.5 nelle stazioni di background urbano di sei città lombarde (Milano, Brescia, Bergamo, Cremona, Pavia, Mantova).",
             "chart_html": chart_inquinamento(pollution_data),
-            "source_html": 'Fonte: <a href="https://www.dati.lombardia.it/Ambiente/Dati-sensori-aria/nicp-bhqi" target="_blank" rel="noopener">ARPA Lombardia</a> via dati.lombardia.it · aggiornamento mensile',
+            "headline_html": headline_pollution(pollution_data),
+            "citation_html": citation_html(
+                '<a href="https://www.dati.lombardia.it/Ambiente/Dati-sensori-aria/nicp-bhqi" target="_blank" rel="noopener">ARPA Lombardia</a> via dati.lombardia.it',
+                "aggiornamento mensile", last_period_of(pollution_data["observations"]),
+            ),
+            "table_html": table_pollution(pollution_data),
         },
         {
             "key": "auto_milano",
+            "group": "transizione",
+            "category": "Mobilità · parco veicoli",
             "updated_at": auto_data.get("updated_at", ""),
             "title": "Auto in provincia di Milano",
-            "subtitle": "Parco autovetture circolanti in provincia di Milano per tipo di alimentazione. Il totale è quasi <strong>stabile attorno a 1,85 milioni</strong>, ma la composizione cambia: il <strong>gasolio cala</strong> dal Dieselgate in poi, mentre <strong>ibridi, elettrici, GPL e metano</strong> raddoppiano.",
+            "subtitle": "Parco autovetture circolanti per tipo di alimentazione. Il totale è stabile ma la composizione si trasforma da un anno all'altro.",
             "chart_html": chart_auto_milano(auto_data),
-            "source_html": 'Fonte: <a href="https://www.aci.it/laci/studi-e-ricerche/dati-e-statistiche/open-data.html" target="_blank" rel="noopener">ACI Autoritratto</a> · aggiornamento annuale (autunno)',
+            "headline_html": headline_auto_milano(auto_data),
+            "citation_html": citation_html(
+                '<a href="https://www.aci.it/laci/studi-e-ricerche/dati-e-statistiche/open-data.html" target="_blank" rel="noopener">ACI Autoritratto</a>',
+                "aggiornamento annuale (autunno)", str(auto_data["observations"][-1]["year"]),
+            ),
         },
         {
             "key": "banks",
+            "group": "societa",
+            "category": "Finanza · attori",
             "updated_at": banks_data.get("updated_at", ""),
             "title": "Banche e fintech",
-            "subtitle": "Numero clienti delle principali banche italiane nell'ultimo anno disponibile, con la <strong>variazione percentuale rispetto a 5 anni prima</strong>. Le tradizionali hanno parchi clienti strutturalmente stabili; le fintech (<strong>Revolut</strong>, <strong>HYPE</strong>) crescono di ordini di grandezza.",
+            "subtitle": "Numero clienti delle principali banche italiane nell'ultimo anno disponibile, con la variazione rispetto a cinque anni prima.",
             "chart_html": chart_banks(banks_data),
-            "source_html": 'Fonte: bilanci annuali e comunicati ufficiali · aggiornamento annuale (primavera, manuale)',
+            "headline_html": headline_banks(banks_data),
+            "citation_html": citation_html(
+                "bilanci annuali e comunicati ufficiali",
+                "aggiornamento annuale (manuale)", str(banks_data["observations"][-1]["year"]),
+            ),
         },
     ]
     # Feed-style: il più recente in cima. A parità di data, ordine stabile.
     topics.sort(key=lambda t: t["updated_at"], reverse=True)
 
-    topics_html = "\n\n".join(render_topic(t) for t in topics)
+    topics_html = "\n\n".join(render_topic(t, i) for i, t in enumerate(topics))
+
+    # TOC: una voce per topic, mantenendo l'ordine già stabilito
+    toc_items = "\n".join(
+        f'      <li data-group="{t["group"]}"><a href="#{t["key"]}">{t["title"]}</a></li>'
+        for t in topics
+    )
+
     updated_at = max(t["updated_at"] for t in topics) or "—"
+    n_topics = str(len(topics))
 
     out = (TEMPLATE
            .replace("__TOPICS__", topics_html)
+           .replace("__TOC__", "\n" + toc_items + "\n    ")
+           .replace("__N_TOPICS__", n_topics)
+           .replace("__REPO_URL__", REPO_URL)
            .replace("__UPDATED_AT__", updated_at)
            .replace("__BUILD_DATE__", date.today().isoformat()))
 
     OUTPUT_HTML.write_text(out, encoding="utf-8")
-    print(f"✓ Sito generato in {OUTPUT_HTML}")
+    print(f"✓ Sito generato in {OUTPUT_HTML} ({len(topics)} topic)")
     return 0
 
 
