@@ -63,6 +63,8 @@
     section.card[data-group="transizione"] .cat { color: var(--accent-transizione); }
     section.card[data-group="societa"]     .cat { color: var(--accent-societa); }
     section.card h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: clamp(24px, 2.6vw, 32px); margin: 0 0 8px; letter-spacing: -0.005em; line-height: 1.15; }
+    .badge-fresh { display: inline-block; background: #c0392b; color: #fff; font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.12em; font-size: 9.5px; font-weight: 500; padding: 4px 8px 3px; border-radius: 3px; vertical-align: middle; margin-left: 12px; line-height: 1; transform: translateY(-4px); }
+    @media (prefers-color-scheme: dark) { .badge-fresh { background: #e8553f; color: #16130f; } }
     section.card .sub { color: var(--fg-soft); font-size: 14px; line-height: 1.55; margin: 0 0 24px; max-width: 64ch; }
 
     /* Headline KPI — la cifra-chiave prima del grafico */
@@ -134,7 +136,7 @@
     <main>
         <section class="card" id="pollution" data-group="transizione">
       <p class="cat">Ambiente · aria</p>
-      <h2>PM2.5 in Pianura Padana</h2>
+      <h2>PM2.5 in Pianura Padana <span class="badge-fresh" title="Aggiornato negli ultimi giorni">Aggiornato</span></h2>
       <p class="sub">Media mensile di particolato fine PM2.5 nelle stazioni di background urbano di sei città lombarde (Milano, Brescia, Bergamo, Cremona, Pavia, Mantova).</p>
       <div class="headline"><div class="kpi">13,7<span class="unit">µg/m³</span></div><div class="ctx">media PM2.5 di <b>aprile 2026</b> su 4 città lombarde — <span class="pos">sotto la soglia annuale OMS</span> (15 µg/m³).</div></div>
       <div class="citation"><span class="cite-label">Fonte</span><span class="cite-body"><a href="https://www.dati.lombardia.it/Ambiente/Dati-sensori-aria/nicp-bhqi" target="_blank" rel="noopener">ARPA Lombardia</a> via dati.lombardia.it<span class="cite-meta">— aggiornamento mensile · ultimo dato: aprile 2026</span></span></div>
@@ -146,7 +148,7 @@
 
     <section class="card" id="bev" data-group="transizione">
       <p class="cat">Mobilità · transizione</p>
-      <h2>Auto full electric immatricolate</h2>
+      <h2>Auto full electric immatricolate <span class="badge-fresh" title="Aggiornato negli ultimi giorni">Aggiornato</span></h2>
       <p class="sub">Nuove BEV registrate ogni mese in Italia. Barre: numero immatricolazioni; linea: quota di mercato sul totale del mese.</p>
       <div class="headline"><div class="kpi">13.238<span class="unit">BEV</span></div><div class="ctx"><b>aprile 2026</b> · <b>8,5%</b> di quota di mercato · <span class="pos">+98% YoY</span> sulle immatricolazioni</div></div>
       <div class="citation"><span class="cite-label">Fonte</span><span class="cite-body"><a href="https://unrae.it/notizie" target="_blank" rel="noopener">UNRAE</a><span class="cite-meta">— aggiornamento mensile · ultimo dato: aprile 2026</span></span></div>
@@ -158,7 +160,7 @@
 
     <section class="card" id="mobile" data-group="societa">
       <p class="cat">Telecom · concorrenza</p>
-      <h2>Operatori telefonici mobili</h2>
+      <h2>Operatori telefonici mobili <span class="badge-fresh" title="Aggiornato negli ultimi giorni">Aggiornato</span></h2>
       <p class="sub">Quota di mercato sulle SIM Human (escluse M2M/IoT) nell'ultimo trimestre disponibile, con variazione rispetto allo stesso trimestre dell'anno prima.</p>
       <div class="headline"><div class="kpi">25,1<span class="unit">%</span></div><div class="ctx"><b>Vodafone+Fastweb</b> resta il primo operatore SIM Human nel <b>Q4 2025</b>. Quattro operatori si dividono il mercato in fasce strette: 16–25%.</div></div>
       <div class="citation"><span class="cite-label">Fonte</span><span class="cite-body"><a href="https://www.agcom.it/comunicazione/comunicati-stampa" target="_blank" rel="noopener">AGCOM — Osservatorio sulle Comunicazioni</a><span class="cite-meta">— aggiornamento trimestrale · ultimo dato: Q4 2025</span></span></div>
@@ -169,7 +171,7 @@
 
     <section class="card" id="desert" data-group="societa">
       <p class="cat">Accesso · servizi</p>
-      <h2>Desertificazione bancaria</h2>
+      <h2>Desertificazione bancaria <span class="badge-fresh" title="Aggiornato negli ultimi giorni">Aggiornato</span></h2>
       <p class="sub">Numero totale di sportelli bancari aperti in Italia, a fine anno. Misura quanto la rete fisica si è ritirata dal picco del 2012.</p>
       <div class="headline"><div class="kpi">19.140</div><div class="ctx">sportelli aperti a fine <b>2025</b>, <span class="neg">-43%</span> dal picco di <b>2010</b> (33.700). <b>3.457 comuni</b> oggi sono senza sportello bancario.</div></div>
       <div class="citation"><span class="cite-label">Fonte</span><span class="cite-body"><a href="https://www.firstcisl.it/tag/osservatorio-desertificazione-bancaria/" target="_blank" rel="noopener">First CISL</a> (su dati Banca d'Italia / ISTAT)<span class="cite-meta">— aggiornamento annuale (fine gennaio) · ultimo dato: 2025</span></span></div>

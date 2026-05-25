@@ -552,6 +552,8 @@ TEMPLATE = """<!doctype html>
     section.card[data-group="transizione"] .cat { color: var(--accent-transizione); }
     section.card[data-group="societa"]     .cat { color: var(--accent-societa); }
     section.card h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: clamp(24px, 2.6vw, 32px); margin: 0 0 8px; letter-spacing: -0.005em; line-height: 1.15; }
+    .badge-fresh { display: inline-block; background: #c0392b; color: #fff; font-family: "Geist", sans-serif; text-transform: uppercase; letter-spacing: 0.12em; font-size: 9.5px; font-weight: 500; padding: 4px 8px 3px; border-radius: 3px; vertical-align: middle; margin-left: 12px; line-height: 1; transform: translateY(-4px); }
+    @media (prefers-color-scheme: dark) { .badge-fresh { background: #e8553f; color: #16130f; } }
     section.card .sub { color: var(--fg-soft); font-size: 14px; line-height: 1.55; margin: 0 0 24px; max-width: 64ch; }
 
     /* Headline KPI — la cifra-chiave prima del grafico */
@@ -669,6 +671,22 @@ def _delta_span(delta_pct: float, suffix: str = "") -> str:
     if delta_pct > 0:
         return f'<span class="pos">+{delta_pct:.0f}%{suffix}</span>'
     return f'<span class="neg">{delta_pct:.0f}%{suffix}</span>'
+
+
+# Quanti giorni dopo l'updated_at il badge "AGGIORNATO" resta visibile.
+FRESH_WINDOW_DAYS = 7
+
+
+def is_fresh(updated_at: str) -> bool:
+    """True se updated_at è entro FRESH_WINDOW_DAYS dalla data odierna."""
+    if not updated_at:
+        return False
+    try:
+        ts = date.fromisoformat(updated_at)
+    except ValueError:
+        return False
+    delta = (date.today() - ts).days
+    return 0 <= delta <= FRESH_WINDOW_DAYS
 
 
 def headline_html(kpi: str, unit: str, context: str) -> str:
@@ -831,9 +849,11 @@ def table_pollution(d: dict) -> str:
 def render_topic(t: dict, index: int) -> str:
     """Renderizza una singola sezione topic con headline, citation, chart, tabella opzionale."""
     table = f"\n        {t['table_html']}" if t.get("table_html") else ""
+    badge = (' <span class="badge-fresh" title="Aggiornato negli ultimi giorni">Aggiornato</span>'
+             if is_fresh(t.get("updated_at", "")) else "")
     return f"""    <section class="card" id="{t['key']}" data-group="{t['group']}">
       <p class="cat">{t['category']}</p>
-      <h2>{t['title']}</h2>
+      <h2>{t['title']}{badge}</h2>
       <p class="sub">{t['subtitle']}</p>
       {t['headline_html']}
       {t['citation_html']}
