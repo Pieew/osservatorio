@@ -140,7 +140,7 @@ def chart_bev(data: dict) -> str:
                            ticksuffix="%", automargin=True)
     fig.update_layout(**layout)
 
-    return pio.to_html(fig, include_plotlyjs="cdn", full_html=False, div_id="chart-bev",
+    return pio.to_html(fig, include_plotlyjs=False, full_html=False, div_id="chart-bev",
                        config=chart_config(static=False))
 
 
@@ -556,6 +556,9 @@ TEMPLATE = """<!doctype html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Plotly caricato una sola volta qui: i singoli chart usano include_plotlyjs=False
+       perché l'ordine feed-style può far precedere chart_bev da altri grafici. -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
   <style>
     :root {
       --bg: #faf8f3;
